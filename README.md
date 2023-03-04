@@ -21,8 +21,13 @@ Once you are setup, you can run the game like so:
 python3 -m wordy
 ```
 
-Alternatively, you can open up [__main__.py](wordy/__main__.py) in your IDE and click the run button at the bottom.
+Alternatively, you can open up [`__main__.py`](wordy/__main__.py) in your IDE and click the run button at the bottom.
 
 ## Writing code
 All code will go inside of the [wordy](wordy) directory.
 You can write unit tests inside the [tests/unit](tests/unit) directory.
+
+## Testing
+```shell
+python3 -m tests.unit.basic_test
+```
