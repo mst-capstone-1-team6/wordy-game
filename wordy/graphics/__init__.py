@@ -17,11 +17,12 @@ def main():
     pygame.display.set_caption("Wordy Game")
 
     game_screen = TitleScreen()
+    game_screen = game_screen.next_screen()
 
     try:
         while True:
-            game_screen.update()
-            game_screen = game_screen.next_screen()
+            game_screen.update(game_display)
+
 
             # TODO decide if we want to keep the call to update() here or if we should move it into Screen#update()
             pygame.display.update()

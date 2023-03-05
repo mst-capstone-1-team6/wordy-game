@@ -2,6 +2,7 @@ import pygame
 
 from wordy.graphics.common import common_handle_event
 from wordy.graphics.screen import Screen
+from wordy.graphics.gamescreen import GameScreen
 
 
 class TitleScreen(Screen):
@@ -15,8 +16,8 @@ class TitleScreen(Screen):
             common_handle_event(event)
             # TODO check if some button is pressed. If it is, set self.__next_screen = GameScreen()
 
-    def update(self):
+    def update(self, game_display):
         self.__event_handler()
 
     def next_screen(self) -> 'Screen':
-        return self.__next_screen
+        return GameScreen()

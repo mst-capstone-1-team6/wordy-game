@@ -27,7 +27,6 @@ class Move:
     Represents a move that a player can make.
     Note that you must validate that this is a valid move before creating this.
     Once a Move instance is created, it is expected that none of its values will be mutated.
-
     A move is designed to describe how a game's state should be altered.
     """
 
@@ -40,7 +39,6 @@ class Controller(abc.ABC):
     """
     Represents an object that can make moves.
     Effectively represents a player, but does not contain state.
-
     Since a Controller should not contain state, it should be possible for the same instance of (for instance) an AIController
     to be used to play against the same instance of an AIController.
     """
