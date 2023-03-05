@@ -1,7 +1,6 @@
 from typing import Optional
 
-from wordy.base.controller import Controller
-from wordy.base.game import Game, Player, Move
+from wordy.base.game import Game, Player, Move, Controller
 
 
 class HumanController(Controller):
