@@ -1,8 +1,9 @@
+import abc
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
+from typing import Optional
 
 from wordy.base.board import Board, Position, Tile
-from wordy.base.controller import Controller
 
 
 class Player:
@@ -26,11 +27,29 @@ class Move:
     Represents a move that a player can make.
     Note that you must validate that this is a valid move before creating this.
     Once a Move instance is created, it is expected that none of its values will be mutated.
+
+    A move is designed to describe how a game's state should be altered.
     """
 
     new_hand: List[Tile]
     """The new hand of the player."""
     word_placement: Optional[WordPlacement]
+
+
+class Controller(abc.ABC):
+    """
+    Represents an object that can make moves.
+    Effectively represents a player, but does not contain state.
+
+    Since a Controller should not contain state, it should be possible for the same instance of (for instance) an AIController
+    to be used to play against the same instance of an AIController.
+    """
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def make_move(self, game: 'Game', player: Player) -> Optional[Move]:  # TODO define return type
+        pass
 
 
 class Game:
