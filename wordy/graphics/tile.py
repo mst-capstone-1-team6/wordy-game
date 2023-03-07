@@ -2,7 +2,7 @@ import pygame
 
 
 class Tile(pygame.sprite.Sprite):
-    piece_size = (30, 30)
+    piece_size = (50, 50)
     l = ""
     off_x, off_y = 0, 0
     dragging = False
@@ -24,11 +24,11 @@ class Tile(pygame.sprite.Sprite):
 
         self.rect.x = (self.piece_size[0] * (int(self.rect.centerx / self.piece_size[0])))
         self.rect.y = (self.piece_size[1] * (int(self.rect.centery / self.piece_size[1])))
-        self.grid_spot = ((self.rect.x / self.piece_size[0]) - 1, (self.rect.y / self.piece_size[1]) - 1)
+        self.grid_spot = ((self.rect.x / self.piece_size[0]), (self.rect.y / self.piece_size[1]))
         self.prev_spot = self.grid_spot
 
     def update(self, display):
         if self.grid_lock:
             self.rect.x = (self.piece_size[0] * (int(self.rect.centerx / self.piece_size[0])))
             self.rect.y = (self.piece_size[1] * (int(self.rect.centery / self.piece_size[1])))
-            self.grid_spot = ((self.rect.x / self.piece_size[0]) - 1, (self.rect.y / self.piece_size[1]) - 1)
+            self.grid_spot = ((self.rect.x / self.piece_size[0]), (self.rect.y / self.piece_size[1]))
