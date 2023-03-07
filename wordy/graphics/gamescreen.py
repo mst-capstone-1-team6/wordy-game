@@ -9,22 +9,27 @@ from wordy.graphics.tile import Tile
 from wordy.graphics.cursor import Cursor
 from wordy.base.board import Board
 from wordy.graphics.button import Button
+from wordy.graphics.boarddisplay import BoardDisplay
 
 
 class GameScreen(Screen):
 
     def __init__(self):
         super().__init__()
+        self.piece_size = 50
         # TODO Instantiate HumanControllers here or pass parameters through constructor so that the TitleScreen controls the type of Controllers present
         self.game = Game([AI_CONTROLLER, AI_CONTROLLER])
         self.game_board = Board(15, {})
-        self.submit_word_but = Button()  # Button to submit a word/turn
+        self.ET_button = Button((self.piece_size*16), (self.piece_size*14), 200, 80)
         self.all_sprites = pygame.sprite.LayeredUpdates()  # Holds all the tile sprite
         self.cursor = Cursor()  # Just a sprite to represent the cursor
+        self.UIdisplay = pygame.sprite.Group()
+        self.UIdisplay.add(BoardDisplay(0, 0, 15, self.piece_size))
+        self.UIdisplay.add(self.ET_button)
 
         # Places a bunch of random tiles off to the side
-        for posx in range(35):
-            temp_tile = Tile(((posx % 7) * 30) + 540, (int(posx / 7) * 30) + 90, chr(random.randrange(ord('a'), ord('z') + 1)).upper())
+        for posx in range(4*13):
+            temp_tile = Tile(((posx % 4) * self.piece_size) + (self.piece_size*16), (int(posx / 4) * self.piece_size) + (self.piece_size*0), chr(random.randrange(ord('a'), ord('z') + 1)).upper())
             self.all_sprites.add(temp_tile)
 
     def __event_handler(self):
@@ -45,7 +50,7 @@ class GameScreen(Screen):
                         s.grid_lock = False
                         s.off_x = s.rect.x - self.cursor.rect.x
                         s.off_y = s.rect.y - self.cursor.rect.y
-                elif event.button == 1 and self.submit_word_but.rect.colliderect(self.cursor.rect):
+                elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect):
                     # If the submit word button pressed, check if the move is valid
                     self.check_word()
 
@@ -64,7 +69,7 @@ class GameScreen(Screen):
                         # Puts the tile in a grid spot
                         s.rect.y = (s.piece_size[1] * (int(s.rect.centery / s.piece_size[1])))
                         s.rect.x = (s.piece_size[0] * (int(s.rect.centerx / s.piece_size[0])))
-                        s.grid_spot = ((s.rect.x / s.piece_size[0]) - 1, (s.rect.y / s.piece_size[1]) - 1)
+                        s.grid_spot = ((s.rect.x / s.piece_size[0]), (s.rect.y / s.piece_size[1]))
 
                         # Check to see if the tile is in the board, if so make it a forming word
                         if 14 >= s.grid_spot[0] >= 0 and 14 >= s.grid_spot[1] >= 0:
@@ -84,10 +89,10 @@ class GameScreen(Screen):
     def update(self, game_display):
         self.__event_handler()
         game_display.fill((255, 255, 255))
-        self.draw_grid(game_display, 15, 15, 30, 30, 30)
+        self.UIdisplay.draw(game_display)
         self.all_sprites.draw(game_display)
         self.all_sprites.update(game_display)
-        self.submit_word_but.update(game_display)
+
         # there is a player whose turn it is
         # there is a controller corresponding to that player
         # if that controller is a HumanPlayer, then we should display their hand on the screen and handle drag/drops as a move
@@ -128,8 +133,8 @@ class GameScreen(Screen):
             # Resetting all the new word tiles to the original position
             for s in self.all_sprites:
                 if s.forming_word:
-                    s.rect.x = ((s.prev_spot[0] + 1) * s.piece_size[0])
-                    s.rect.y = ((s.prev_spot[1] + 1) * s.piece_size[1])
+                    s.rect.x = ((s.prev_spot[0]) * s.piece_size[0])
+                    s.rect.y = ((s.prev_spot[1]) * s.piece_size[1])
                     s.grid_spot = s.prev_spot
                     s.forming_word = False
                     s.locked = False

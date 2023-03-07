@@ -10,8 +10,8 @@ def main():
 
     pygame.init()
 
-    display_width = 800
-    display_height = 600
+    display_width = 1000
+    display_height = 800
 
     game_display = pygame.display.set_mode((display_width, display_height))
     pygame.display.set_caption("Wordy Game")
