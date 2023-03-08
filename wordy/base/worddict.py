@@ -1,9 +1,22 @@
 from typing import List
 
 class WordDict():
-    def __init__(self, dictFile: str):
+    """To create a new WordDict use either WordDict.fromFile() or WordDict.fromList()"""
+    def __init__(self, dictFile: str = None):
+        self.words = []
+    
+    @classmethod
+    def fromFile(cls, fileName: str) -> WordDict:
+        new = cls.__new__(cls)
         with open(dictFile, "r") as f:
-            self.words: List[str] = [i.rstrip() for i in f.readlines()]
+            new.words: List[str] = [i.rstrip() for i in f.readlines()]
+        return new
+    
+    @classmethod
+    def fromList(cls, words: List[str]) -> WordDict:
+        new = cls.__new__(cls)
+        new.words = words
+        return new
     
     def testWord(self, test: str) -> bool:
         if test.upper() in self.words:
