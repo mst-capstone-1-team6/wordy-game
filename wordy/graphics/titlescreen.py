@@ -3,6 +3,7 @@ import pygame
 from wordy.graphics.common import common_handle_event
 from wordy.graphics.screen import Screen
 from wordy.graphics.gamescreen import GameScreen
+from wordy.base.game import Player
 
 
 class TitleScreen(Screen):
@@ -20,4 +21,4 @@ class TitleScreen(Screen):
         self.__event_handler()
 
     def next_screen(self) -> 'Screen':
-        return GameScreen()
+        return GameScreen([Player("Player1"), Player("Player2")])
