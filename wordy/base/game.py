@@ -3,14 +3,18 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 from typing import Optional
 
+import pygame.sprite
+
 from wordy.base.board import Board, Position, Tile
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, player_name):
         self.score: int = 0
-        self.hand: List[Tile] = []
+        self.hand: pygame.sprite.LayeredUpdates = pygame.sprite.LayeredUpdates()
         self.passed_last_turn = False
+        self.missing_ties: List[int] = []
+        self.name = player_name
 
 
 @dataclass
@@ -53,7 +57,7 @@ class Controller(abc.ABC):
 class Game:
     def __init__(self, controllers: List[Controller]):
         self.board = Board(15, {})
-        self.players: List[Tuple[Player, Controller]] = [(Player(), controller) for controller in controllers]
+        self.players: List[Tuple[Player, Controller]] = [(Player("player"), controller) for controller in controllers]
         """A list where each entry contains a Player object and a Controller object. The player object may be mutated to update score and a player's hand"""
         self.turn_index = 0
 
