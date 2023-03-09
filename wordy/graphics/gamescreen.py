@@ -2,9 +2,9 @@ import pygame
 import random
 
 from typing import List
-from wordy.base.aicontroller import AI_CONTROLLER
+from wordy.base.aicontroller import AI_CONTROLLER, AIController
 from wordy.graphics.humancontroller import HumanController
-from wordy.base.game import Game, Player, Move
+from wordy.base.game import Game, Player, Move, Controller
 from wordy.graphics.common import common_handle_event
 from wordy.graphics.screen import Screen
 from wordy.graphics.tile import Tile
@@ -15,7 +15,8 @@ from wordy.graphics.boarddisplay import BoardDisplay
 
 
 class GameScreen(Screen):
-    current_control: HumanController = HumanController()
+    current_control: HumanController = HumanController("Player")
+    current_player: Player = Player("Player")
     def __init__(self):
         super().__init__()
         self.piece_size = 50
@@ -23,7 +24,7 @@ class GameScreen(Screen):
         self.ref_board = {}
         # TODO Instantiate HumanControllers here or pass parameters through constructor so that the TitleScreen controls the type of Controllers present
 
-        self.game = Game([HumanController()])
+        self.game = Game([HumanController("Player1"), HumanController("Player2")])
 
         self.ET_button = Button((self.piece_size * 15.5), (self.piece_size * 13.5), 200, 80, "END TURN")
         self.NH_button = Button((self.piece_size * 15.5), (self.piece_size * 11.5), 200, 80, "NEW HAND")
@@ -74,6 +75,7 @@ class GameScreen(Screen):
                     self.current_control.end_turn(self.game.board)
                 elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect):
                     # If the new hand button pressed, give the player a new hand
+                    self.current_player.passed_last_turn = True
                     self.current_control.new_hand(self.game.letter_bag)
 
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -139,15 +141,16 @@ class GameScreen(Screen):
 
         (player, controller) = self.game.current_player
 
+        pygame.font.init()
+        font = pygame.font.SysFont('Comic Sans MS', 40)
+
         if isinstance(controller, HumanController):
             self.current_control = controller
+            self.current_player = player
 
             controller.draw_tiles(self.game.letter_bag)
             controller.hand_tiles.draw(game_display)
             controller.hand_tiles.update(game_display)
-
-            pygame.font.init()
-            font = pygame.font.SysFont('Comic Sans MS', 40)
 
             # Display current player's name
             text_surface = font.render(self.current_control.name, True, (0, 0, 0))
@@ -156,6 +159,16 @@ class GameScreen(Screen):
             # Display how many tiles left in the bag
             text_surface = font.render(str(len(self.game.letter_bag.letters)) + " letters left", True, (0, 0, 0))
             game_display.blit(text_surface, (self.piece_size * 16, self.piece_size * 0))
+
+        p: Player
+        c: Controller
+        for i in range(len(self.game.players)):
+            (p, c) = self.game.players[i]
+            if isinstance(c, AIController):
+                text_surface = font.render("Computer: " + str(p.score), True, (0, 0, 0))
+            else:
+                text_surface = font.render(c.name + ": " + str(p.score), True, (0, 0, 0))
+            game_display.blit(text_surface, (self.piece_size * (4+(4*i)), self.piece_size * 15.3))
 
         # there is a player whose turn it is
         # there is a controller corresponding to that player

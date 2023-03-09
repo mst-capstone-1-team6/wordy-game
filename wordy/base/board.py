@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Optional, Literal
+from typing import Tuple, Dict, Optional, Literal, List
 
 Position = Tuple[int, int]
 # Tile = str
@@ -26,6 +26,52 @@ class Board:
 
     def num_tiles(self):
         return len(self.__tile_dict)
+
+    def get_words(self, tiles: Dict[Position, Tile]) -> List[str]:
+        new_board = self.place_tiles(tiles)
+        spelled_words = []
+
+        last_x = -1
+        last_y = -1
+        for position, tile in tiles.items():
+
+            # First if statement will handle finding words vertical to the current tile
+            i = position[1]
+            j = position[1]
+            vert_word = tile
+            # The last_x/last_y will take into account that we aren't repeating the same word multiple times
+            if last_x != position[0] and (new_board.tile_at((position[0], i + 1)) or new_board.tile_at((position[0], j - 1))):
+                # While loop will move 1 tile up and down at a time until it can no longer
+                while (new_board.tile_at((position[0], i+1))) or (new_board.tile_at((position[0], j-1))):
+                    if new_board.tile_at((position[0], i+1)):
+                        # If there is a tile below, add it to the end of the word
+                        vert_word = vert_word + new_board.tile_at((position[0], i+1))
+                        i += 1
+                    if new_board.tile_at((position[0], j-1)):
+                        # If there is a tile above, add it to the start of the word
+                        vert_word = new_board.tile_at((position[0], j-1)) + vert_word
+                        j -= 1
+                # Add whatever word we got to the list of spelled words
+                spelled_words.append(vert_word)
+                last_x = position[0]
+
+            # Second if statement will handle finding words horizontal to the current tile
+            i = position[0]
+            j = position[0]
+            hori_word = tile
+            # This will work much the same to the vertical one, just flipped the x and y
+            if last_y != position[1] and (new_board.tile_at((i + 1, position[1])) or new_board.tile_at((j - 1, position[1]))):
+                while (new_board.tile_at((i+1, position[1]))) or (new_board.tile_at((j-1, position[1]))):
+                    if new_board.tile_at((i+1, position[1])):
+                        hori_word = hori_word + new_board.tile_at((i+1, position[1]))
+                        i += 1
+                    if new_board.tile_at((j-1, position[1])):
+                        hori_word = new_board.tile_at((j-1, position[1])) + hori_word
+                        j -= 1
+                spelled_words.append(hori_word)
+                last_y = position[1]
+
+        return spelled_words
 
     def place_tiles(self, tiles: Dict[Position, Tile]) -> 'Board':
         new_dict = dict(self.__tile_dict)

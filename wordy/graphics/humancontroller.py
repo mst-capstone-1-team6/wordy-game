@@ -10,12 +10,12 @@ from wordy.graphics.tile import Tile
 class HumanController(Controller):
     word_placement: WordPlacement
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
 
         self.finished_move = False
         self.hand_tiles = pygame.sprite.LayeredUpdates()
-        self.name = "Player"
+        self.name = name
         self.empty_spots = [0, 1, 2, 3, 4, 5, 6]
 
     def new_hand(self, letter_bag: LetterBag):
@@ -51,39 +51,19 @@ class HumanController(Controller):
                     if s.grid_spot == (7, 7):
                         middle_flag = True
                     tile_places[s.grid_spot] = s.l
+            if start_y==14 and start_x==14 and end_y==0 and end_x==0:
+                self.word_placement = None
+                self.finished_move = True
 
             if not middle_flag and first_word:
                 raise ValueError
 
-            if start_y == end_y:
-                word = ""
-                for i in range(int(start_x), int(end_x)):
-                    if cur_board.tile_at((i, start_y)):
-                        word += cur_board.tile_at((i, start_y))
-                    elif tile_places.get((i, start_y)):
-                        word += tile_places.get((i, start_y))
-                    else:
-                        raise ValueError
-
-                self.word_placement = WordPlacement(tile_places, (start_x,start_y), (end_x, start_y), word)
-
-            elif start_x == end_x:
-                word = ""
-                for i in range(int(start_y), int(end_y)):
-                    if cur_board.tile_at((start_x, i)):
-                        word += cur_board.tile_at((start_x, i))
-                    elif tile_places.get((start_x, i)):
-                        word += tile_places.get((start_x, i))
-                    else:
-                        raise ValueError
-
-                self.word_placement = WordPlacement(tile_places, (start_x, start_y), (start_x, end_y), word)
-
-            else:
+            if start_y!=end_y and start_x!=end_x:
                 raise ValueError
 
-                print("oopsie")
-                return
+            print(cur_board.get_words(tile_places))
+
+            self.word_placement = WordPlacement(tile_places, (start_x, start_y), (start_x, end_y), "hello")
 
             s: Tile
             for s in self.hand_tiles.sprites():
