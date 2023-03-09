@@ -1,9 +1,8 @@
 import abc
+import random
 from dataclasses import dataclass
 from typing import List, Tuple, Dict
 from typing import Optional
-
-import pygame.sprite
 
 from wordy.base.board import Board, Position, Tile
 
@@ -11,10 +10,8 @@ from wordy.base.board import Board, Position, Tile
 class Player:
     def __init__(self, player_name):
         self.score: int = 0
-        self.hand: pygame.sprite.LayeredUpdates = pygame.sprite.LayeredUpdates()
+        self.hand: List[Tile] = []
         self.passed_last_turn = False
-        self.missing_ties: List[int] = []
-        self.name = player_name
 
 
 @dataclass
@@ -46,6 +43,7 @@ class Controller(abc.ABC):
     Since a Controller should not contain state, it should be possible for the same instance of (for instance) an AIController
     to be used to play against the same instance of an AIController.
     """
+
     def __init__(self):
         pass
 
@@ -54,12 +52,26 @@ class Controller(abc.ABC):
         pass
 
 
+class LetterBag:
+    letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+               'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
+               'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
+               'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
+
+    def get_tile(self) -> Tile:
+        return self.letters.pop(random.randrange(len(self.letters)))
+
+    def return_tile(self, tile: Tile):
+        self.letters.append(tile)
+
+
 class Game:
     def __init__(self, controllers: List[Controller]):
         self.board = Board(15, {})
         self.players: List[Tuple[Player, Controller]] = [(Player("player"), controller) for controller in controllers]
         """A list where each entry contains a Player object and a Controller object. The player object may be mutated to update score and a player's hand"""
         self.turn_index = 0
+        self.letter_bag = LetterBag()
 
     @property
     def current_player(self) -> Tuple[Player, Controller]:

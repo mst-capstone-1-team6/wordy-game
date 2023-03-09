@@ -24,6 +24,9 @@ class Board:
         """
         return self.__tile_dict.get(position)
 
+    def num_tiles(self):
+        return len(self.__tile_dict)
+
     def place_tiles(self, tiles: Dict[Position, Tile]) -> 'Board':
         new_dict = dict(self.__tile_dict)
         for position, tile in tiles.items():

@@ -21,4 +21,4 @@ class TitleScreen(Screen):
         self.__event_handler()
 
     def next_screen(self) -> 'Screen':
-        return GameScreen([Player("Player1"), Player("Player2")])
+        return GameScreen()
