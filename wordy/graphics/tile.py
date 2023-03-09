@@ -1,5 +1,7 @@
 import pygame
 
+from typing import Tuple
+
 
 class Tile(pygame.sprite.Sprite):
     piece_size = (50, 50)
@@ -7,32 +9,29 @@ class Tile(pygame.sprite.Sprite):
     off_x, off_y = 0, 0
     dragging = False
     grid_lock = True
-    grid_spot = (0, 0)
-    prev_spot = (0, 0)
+    grid_spot: Tuple[int, int] = (0, 0)
+    prev_spot: Tuple[int, int] = (0, 0)
     forming_word = False
-    locked = False
-    hand_pos = 0
 
-    def __init__(self, pos_x, pos_y, letter, hand_spot):
+
+    def __init__(self, grid_pos: Tuple[int, int], letter):
         pygame.sprite.Sprite.__init__(self)
 
         self.l = letter
-        self.hand_pos = hand_spot
         self.image = pygame.transform.scale(pygame.image.load("assets/letter/Wood/letter_" + letter + ".png"), self.piece_size)
 
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = pos_x, pos_y
+        self.grid_spot = grid_pos
         self.rect.size = self.piece_size
 
-        self.rect.x = (self.piece_size[0] * (int(self.rect.centerx / self.piece_size[0])))
-        self.rect.y = (self.piece_size[1] * (int(self.rect.centery / self.piece_size[1])))
-        self.grid_spot = ((self.rect.x / self.piece_size[0]), (self.rect.y / self.piece_size[1]))
+        self.rect.x = (self.piece_size[0] * grid_pos[0])
+        self.rect.y = (self.piece_size[1] * grid_pos[1])
+
         self.prev_spot = self.grid_spot
 
     def update(self, display):
         if self.grid_lock:
-            self.rect.x = (self.piece_size[0] * (int(self.rect.centerx / self.piece_size[0])))
-            self.rect.y = (self.piece_size[1] * (int(self.rect.centery / self.piece_size[1])))
-            self.grid_spot = ((self.rect.x / self.piece_size[0]), (self.rect.y / self.piece_size[1]))
+            self.rect.x = (self.piece_size[0] * (self.grid_spot[0]))
+            self.rect.y = (self.piece_size[1] * (self.grid_spot[1]))
         if self.forming_word:
             pygame.draw.lines(display, (255, 0, 0), True, (self.rect.topleft, self.rect.bottomleft, self.rect.bottomright, self.rect.topright), 3)
