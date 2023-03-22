@@ -3,7 +3,6 @@ import pygame
 from wordy.graphics.common import common_handle_event
 from wordy.graphics.screen import Screen
 from wordy.graphics.gamescreen import GameScreen
-from wordy.base.game import Player
 
 
 class TitleScreen(Screen):
