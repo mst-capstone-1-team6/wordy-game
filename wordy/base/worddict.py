@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List
 
 class WordDict():
@@ -8,7 +9,7 @@ class WordDict():
     @classmethod
     def fromFile(cls, fileName: str) -> WordDict:
         new = cls.__new__(cls)
-        with open(dictFile, "r") as f:
+        with open(fileName, "r") as f:
             new.words: List[str] = [i.rstrip() for i in f.readlines()]
         return new
     
