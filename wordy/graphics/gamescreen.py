@@ -12,8 +12,6 @@ from wordy.graphics.boarddisplay import BoardDisplay
 
 
 class GameScreen(Screen):
-    current_control: HumanController = HumanController("Player")
-    current_player: Player = Player()
 
     def __init__(self):
         super().__init__()
@@ -35,64 +33,66 @@ class GameScreen(Screen):
         self.cursor = Cursor()  # Just a sprite to represent the cursor
 
     def __event_handler(self):
-        for event in pygame.event.get():
-            common_handle_event(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
+        (player, controller) = self.game.current_player
+        if isinstance(controller, HumanController):
+            for event in pygame.event.get():
+                common_handle_event(event)
+                if event.type == pygame.MOUSEBUTTONDOWN:
 
-                self.cursor.rect.x = event.pos[0]
-                self.cursor.rect.y = event.pos[1]
-                # Gets all the tiles that collide with the cursor
-                sprite_collides = pygame.sprite.spritecollide(self.cursor, self.current_control.hand_tiles, False)
+                    self.cursor.rect.x = event.pos[0]
+                    self.cursor.rect.y = event.pos[1]
+                    # Gets all the tiles that collide with the cursor
+                    sprite_collides = pygame.sprite.spritecollide(self.cursor, controller.hand_tiles, False)
 
-                if event.button == 1 and sprite_collides:
-                    s = sprite_collides[len(sprite_collides) - 1]  # Only selects the top most tile
-                    self.current_control.hand_tiles.move_to_front(s)
-                    s.dragging = True
-                    s.grid_lock = False
-                    s.off_x = s.rect.x - self.cursor.rect.x
-                    s.off_y = s.rect.y - self.cursor.rect.y
-                    s.forming_word = True
-                elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect):
-                    # If the submit word button pressed, check if the move is valid
-                    self.current_control.end_turn(self.game.board)
-                elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect):
-                    # If the new hand button pressed, give the player a new hand
-                    self.current_control.new_hand(self.game.letter_bag)
-                    self.current_control.end_turn(self.game.board)
+                    if event.button == 1 and sprite_collides:
+                        s = sprite_collides[len(sprite_collides) - 1]  # Only selects the top most tile
+                        controller.hand_tiles.move_to_front(s)
+                        s.dragging = True
+                        s.grid_lock = False
+                        s.off_x = s.rect.x - self.cursor.rect.x
+                        s.off_y = s.rect.y - self.cursor.rect.y
+                        s.forming_word = True
+                    elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect):
+                        # If the submit word button pressed, check if the move is valid
+                        controller.end_turn(self.game.board)
+                    elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect):
+                        # If the new hand button pressed, give the player a new hand
+                        controller.new_hand(self.game.letter_bag)
+                        controller.end_turn(self.game.board)
 
-            elif event.type == pygame.MOUSEBUTTONUP:
-                self.cursor.rect.x = event.pos[0]
-                self.cursor.rect.y = event.pos[1]
-                for s in self.current_control.hand_tiles:  # Loop over all tiles to find the one being dragged
-                    if event.button == 1 and s.dragging:  # If the tile is being dragged, release it
-                        s.dragging = False
-                        s.rect.x = self.cursor.rect.x + s.off_x
-                        s.rect.y = self.cursor.rect.y + s.off_y
-                        s.off_x = 0
-                        s.off_y = 0
-                        s.grid_lock = True
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    self.cursor.rect.x = event.pos[0]
+                    self.cursor.rect.y = event.pos[1]
+                    for s in controller.hand_tiles:  # Loop over all tiles to find the one being dragged
+                        if event.button == 1 and s.dragging:  # If the tile is being dragged, release it
+                            s.dragging = False
+                            s.rect.x = self.cursor.rect.x + s.off_x
+                            s.rect.y = self.cursor.rect.y + s.off_y
+                            s.off_x = 0
+                            s.off_y = 0
+                            s.grid_lock = True
 
-                        # Puts the tile in a grid spot
-                        s.rect.y = (s.piece_size[1] * (int(s.rect.centery / s.piece_size[1])))
-                        s.rect.x = (s.piece_size[0] * (int(s.rect.centerx / s.piece_size[0])))
-                        s.grid_spot = ((s.rect.x / s.piece_size[0]), (s.rect.y / s.piece_size[1]))
+                            # Puts the tile in a grid spot
+                            s.rect.y = (s.piece_size[1] * (int(s.rect.centery / s.piece_size[1])))
+                            s.rect.x = (s.piece_size[0] * (int(s.rect.centerx / s.piece_size[0])))
+                            s.grid_spot = ((s.rect.x / s.piece_size[0]), (s.rect.y / s.piece_size[1]))
 
-                        # Check to see if the tile is in the board, if so make it a forming word
-                        if 14 >= s.grid_spot[0] >= 0 and 14 >= s.grid_spot[1] >= 0:
-                            s.forming_word = True
-                        else:
-                            s.rect.x = ((s.prev_spot[0]) * s.piece_size[0])
-                            s.rect.y = ((s.prev_spot[1]) * s.piece_size[1])
-                            s.forming_word = False
-                            s.grid_spot = s.prev_spot
+                            # Check to see if the tile is in the board, if so make it a forming word
+                            if 14 >= s.grid_spot[0] >= 0 and 14 >= s.grid_spot[1] >= 0:
+                                s.forming_word = True
+                            else:
+                                s.rect.x = ((s.prev_spot[0]) * s.piece_size[0])
+                                s.rect.y = ((s.prev_spot[1]) * s.piece_size[1])
+                                s.forming_word = False
+                                s.grid_spot = s.prev_spot
 
-            elif event.type == pygame.MOUSEMOTION:
-                self.cursor.rect.x = event.pos[0]
-                self.cursor.rect.y = event.pos[1]
-                for s in self.current_control.hand_tiles:  # Update the position of a dragged tile
-                    if s.dragging:
-                        s.rect.x = self.cursor.rect.x + s.off_x
-                        s.rect.y = self.cursor.rect.y + s.off_y
+                elif event.type == pygame.MOUSEMOTION:
+                    self.cursor.rect.x = event.pos[0]
+                    self.cursor.rect.y = event.pos[1]
+                    for s in controller.hand_tiles:  # Update the position of a dragged tile
+                        if s.dragging:
+                            s.rect.x = self.cursor.rect.x + s.off_x
+                            s.rect.y = self.cursor.rect.y + s.off_y
 
     def update(self, game_display):
         self.__event_handler()
@@ -127,15 +127,13 @@ class GameScreen(Screen):
         font = pygame.font.SysFont('Comic Sans MS', 40)
 
         if isinstance(controller, HumanController):
-            self.current_control = controller
-            self.current_player = player
 
             controller.draw_tiles(self.game.letter_bag)
             controller.hand_tiles.draw(game_display)
             controller.hand_tiles.update(game_display)
 
             # Display current player's name
-            text_surface = font.render(self.current_control.name, True, (0, 0, 0))
+            text_surface = font.render(controller.name, True, (0, 0, 0))
             game_display.blit(text_surface, (self.piece_size * 16.5, self.piece_size * 2))
 
             # Display how many tiles left in the bag
