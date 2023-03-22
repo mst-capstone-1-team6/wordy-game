@@ -12,12 +12,14 @@ class Tile(pygame.sprite.Sprite):
     grid_spot: Tuple[int, int] = (0, 0)
     prev_spot: Tuple[int, int] = (0, 0)
     forming_word = False
+    board_tile = False
 
-
-    def __init__(self, grid_pos: Tuple[int, int], letter):
+    def __init__(self, grid_pos: Tuple[int, int], letter, board):
         pygame.sprite.Sprite.__init__(self)
 
+        self.board_tile = board
         self.l = letter
+
         self.image = pygame.transform.scale(pygame.image.load("assets/letter/Wood/letter_" + letter + ".png"), self.piece_size)
 
         self.rect = self.image.get_rect()
@@ -35,3 +37,4 @@ class Tile(pygame.sprite.Sprite):
             self.rect.y = (self.piece_size[1] * (self.grid_spot[1]))
         if self.forming_word:
             pygame.draw.lines(display, (255, 0, 0), True, (self.rect.topleft, self.rect.bottomleft, self.rect.bottomright, self.rect.topright), 3)
+

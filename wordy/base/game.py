@@ -8,7 +8,7 @@ from wordy.base.board import Board, Position, Tile
 
 
 class Player:
-    def __init__(self, player_name):
+    def __init__(self):
         self.score: int = 0
         self.hand: List[Tile] = []
         self.passed_last_turn = False
@@ -28,6 +28,7 @@ class Move:
     Represents a move that a player can make.
     Note that you must validate that this is a valid move before creating this.
     Once a Move instance is created, it is expected that none of its values will be mutated.
+
     A move is designed to describe how a game's state should be altered.
     """
 
@@ -40,10 +41,10 @@ class Controller(abc.ABC):
     """
     Represents an object that can make moves.
     Effectively represents a player, but does not contain state.
+
     Since a Controller should not contain state, it should be possible for the same instance of (for instance) an AIController
     to be used to play against the same instance of an AIController.
     """
-
     def __init__(self):
         pass
 
@@ -68,7 +69,7 @@ class LetterBag:
 class Game:
     def __init__(self, controllers: List[Controller]):
         self.board = Board(15, {})
-        self.players: List[Tuple[Player, Controller]] = [(Player("player"), controller) for controller in controllers]
+        self.players: List[Tuple[Player, Controller]] = [(Player(), controller) for controller in controllers]
         """A list where each entry contains a Player object and a Controller object. The player object may be mutated to update score and a player's hand"""
         self.turn_index = 0
         self.letter_bag = LetterBag()

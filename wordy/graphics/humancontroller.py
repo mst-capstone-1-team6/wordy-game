@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional
 
 import pygame.sprite
 
@@ -76,7 +76,7 @@ class HumanController(Controller):
 
     def draw_tiles(self, letter_bag: LetterBag):
         for i in self.empty_spots:
-            self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile()))
+            self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile(), False))
         self.empty_spots = []
 
     def return_tiles(self):
@@ -85,7 +85,6 @@ class HumanController(Controller):
             if s.forming_word:
                 s.grid_spot = s.prev_spot
                 s.forming_word = False
-
 
     def make_move(self, game: Game, player: Player) -> Optional[Move]:
         if self.finished_move:
