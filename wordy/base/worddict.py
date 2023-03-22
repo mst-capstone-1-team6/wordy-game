@@ -23,11 +23,9 @@ class WordDict():
         """Returns a new dictonary which contains only the words in self which fall between the given lengths"""
         return WordDict.fromList([word for word in self.words if len(word) < max and len(word) > min])
     
-    #TODO: Make work
     def trimByLetters(self, lets: List[str] = []) -> WordDict:
-        """Returns a new dictionary which contains only the words in self which contain exactly the given letters"""
-        letSet = set(lets)
-        return WordDict.fromList([word for word in self.words if letSet.issuperset(word)])
+        """Returns a new dictionary which contains only the words in self which contain the given letters"""
+        return WordDict.fromList([word for word in self.words if all([1 if word.find(let) != -1 else 0 for let in lets])])
     
     def testWord(self, test: str) -> bool:
         if test.upper() in self.words:
@@ -35,7 +33,7 @@ class WordDict():
         else:
             return False
 
-    def findOneLetter(self, setLet: str, indexInWord: List[int]) -> List[str]:
+    def findOneLetter(self, setLet: str, indexInWord: List[int]) -> WordDict:
         """Find all words in the dictionary which contain the given letter
            at somewhere in the given range of indexes"""
         setLet = setLet.upper()
@@ -44,23 +42,21 @@ class WordDict():
         #Restrict words to only contain the letter at the given indexes
         results = [word for word in results if len(set([i for i, x in enumerate(word) if x == setLet]).intersection(indexInWord)) > 0]
         
-        return results
+        return WordDict.fromList(results)
     
-    def findManyLetters(self, lets: List[str], offsets: List[int]):
+    def findManyLetters(self, lets: List[str], offsets: List[int]) -> WordDict:
         """Find all words in the dictionary which contain the given letters at the given relative offsets
            eg. findManyLetters(["a", "l"], [0, 1]) will return a list like ["ale", "all", "allow", "evaluate", "seasonal", ...]
                findManyLetters(["e", "s"], [0, 4]) will return a list like ["warehouse", "tunnelers", "snivelers", ...]
                findManyLetters(["l", "a", "e"], [-2, -1, 3]) will return a list like ["lawbreaking", "planeness", "plaintext"]
         """
         lets = [let.upper() for let in lets]
-        #Generate list of all words containing the given letters
-        temp = [word for word in self.words if all([1 if word.find(let) != -1 else 0 for let in lets])]
+        #Generate list of all words containing the given letters of a valid length
+        temp = self.trimByLetters(lets)
+        temp = temp.trimByLength(min = max(offsets) - min(offsets))
         #Restrict words to only have the correct letters at the correct offsets
         results = []
         for word in temp:
-            #If the largest offset if larger than the word, we can safely discard that word
-            if len(word) <= max(offsets) - min(offsets):
-                continue
             #Create the lists of letter locations: adjusting for the offsets
             posSets = []
             for i, setLet in enumerate(lets):
@@ -72,4 +68,5 @@ class WordDict():
                 posSets.append(tempSet)
             if len(set.intersection(*posSets)) > 0:
                 results.append(word)
-        return results
+        return WordDict.fromList(results)
+ 
