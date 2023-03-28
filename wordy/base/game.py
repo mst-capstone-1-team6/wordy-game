@@ -1,9 +1,10 @@
 import abc
+import random
 from dataclasses import dataclass
 from typing import List, Tuple, Dict
 from typing import Optional
 
-from wordy.base.board import Board, Position, Tile
+from wordy.base.board import Board, Position, Tile, WordPlacement
 
 
 class Player:
@@ -13,12 +14,6 @@ class Player:
         self.passed_last_turn = False
 
 
-@dataclass
-class WordPlacement:
-    tile_placements: Dict[Position, Tile]
-    word_start: Position
-    word_end: Position
-    word: str
 
 
 @dataclass
@@ -33,7 +28,8 @@ class Move:
 
     new_hand: List[Tile]
     """The new hand of the player."""
-    word_placement: Optional[WordPlacement]
+    word_placement: List[WordPlacement]
+    tile_placements: Dict[Position, Tile]
 
 
 class Controller(abc.ABC):
@@ -52,12 +48,26 @@ class Controller(abc.ABC):
         pass
 
 
+class LetterBag:
+    letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+               'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
+               'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
+               'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
+
+    def get_tile(self) -> Tile:
+        return self.letters.pop(random.randrange(len(self.letters)))
+
+    def return_tile(self, tile: Tile):
+        self.letters.append(tile)
+
+
 class Game:
     def __init__(self, controllers: List[Controller]):
         self.board = Board(15, {})
         self.players: List[Tuple[Player, Controller]] = [(Player(), controller) for controller in controllers]
         """A list where each entry contains a Player object and a Controller object. The player object may be mutated to update score and a player's hand"""
         self.turn_index = 0
+        self.letter_bag = LetterBag()
 
     @property
     def current_player(self) -> Tuple[Player, Controller]:
@@ -73,8 +83,7 @@ class Game:
                 current_player.passed_last_turn = True
             else:
                 current_player.passed_last_turn = False
-                word_placement = move.word_placement
-                if word_placement is not None:
-                    self.board = self.board.place_tiles(word_placement.tile_placements)
+
+            self.board = self.board.place_tiles(move.tile_placements)
             # do something and update board
             self.turn_index = (self.turn_index + 1) % len(self.players)

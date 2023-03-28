@@ -6,7 +6,7 @@ class Screen(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def update(self):
+    def update(self, game_display):
         pass
 
     @abc.abstractmethod
