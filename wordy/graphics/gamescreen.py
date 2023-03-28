@@ -21,6 +21,8 @@ class GameScreen(Screen):
         # TODO Instantiate HumanControllers here or pass parameters through constructor so that the TitleScreen controls the type of Controllers present
 
         self.game = Game([HumanController("Player1"), HumanController("Player2"), HumanController("Player3"), HumanController("Player4")])
+        for p, c in self.game.players:
+            c.draw_tiles(self.game.letter_bag)
 
         self.ET_button = Button((self.piece_size * 15.5), (self.piece_size * 13.5), 200, 80, "END TURN")
         self.NH_button = Button((self.piece_size * 15.5), (self.piece_size * 11.5), 200, 80, "NEW HAND")
@@ -54,11 +56,20 @@ class GameScreen(Screen):
                     s.forming_word = True
                 elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect):
                     # If the submit word button pressed, check if the move is valid
-                    controller.end_turn(self.game.board)
+                    hand_letters = []
+                    for tile in controller.hand_tiles:
+                        hand_letters.append(tile.l)
+                    player.hand = hand_letters
+                    controller.end_turn(self.game.board, self.game.letter_bag)
+
                 elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect):
                     # If the new hand button pressed, give the player a new hand
+                    hand_letters = []
+                    for tile in controller.hand_tiles:
+                        hand_letters.append(tile.l)
+                    player.hand = hand_letters
                     controller.new_hand(self.game.letter_bag)
-                    controller.end_turn(self.game.board)
+                    controller.end_turn(self.game.board, self.game.letter_bag)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.cursor.rect.x = event.pos[0]
@@ -128,7 +139,6 @@ class GameScreen(Screen):
 
         if isinstance(controller, HumanController):
 
-            controller.draw_tiles(self.game.letter_bag)
             controller.hand_tiles.draw(game_display)
             controller.hand_tiles.update(game_display)
 

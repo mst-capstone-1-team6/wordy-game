@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 from typing import Optional
 
-from wordy.base.board import Board, Position, Tile
+from wordy.base.board import Board, Position, Tile, WordPlacement
 
 
 class Player:
@@ -14,12 +14,6 @@ class Player:
         self.passed_last_turn = False
 
 
-@dataclass
-class WordPlacement:
-    tile_placements: Dict[Position, Tile]
-    word_start: Position
-    word_end: Position
-    word: str
 
 
 @dataclass
@@ -34,7 +28,8 @@ class Move:
 
     new_hand: List[Tile]
     """The new hand of the player."""
-    word_placement: Optional[WordPlacement]
+    word_placement: List[WordPlacement]
+    tile_placements: Dict[Position, Tile]
 
 
 class Controller(abc.ABC):
@@ -88,8 +83,7 @@ class Game:
                 current_player.passed_last_turn = True
             else:
                 current_player.passed_last_turn = False
-                word_placement = move.word_placement
-                if word_placement is not None:
-                    self.board = self.board.place_tiles(word_placement.tile_placements)
+
+            self.board = self.board.place_tiles(move.tile_placements)
             # do something and update board
             self.turn_index = (self.turn_index + 1) % len(self.players)
