@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Optional, Literal, List
+from typing import Tuple, Dict, Optional, Literal, List, Generator
 from dataclasses import dataclass
 
 Position = Tuple[int, int]
@@ -6,6 +6,30 @@ Position = Tuple[int, int]
 Tile = Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 ALPHABET = set(chr(code) for code in range(65, 65 + 26))
+
+
+def over_positions(start: Position, end: Position, inclusive: bool = True) -> Generator[Position, None, None]:
+    current_position = start
+    while True:
+        at_goal = current_position == end
+        if at_goal and not inclusive:
+            return None
+        yield current_position
+        if at_goal:
+            return None
+        if current_position[0] == end[0]:
+            row_change = 0
+        elif current_position[0] < end[0]:
+            row_change = 1
+        else:
+            row_change = -1
+        if current_position[1] == end[1]:
+            col_change = 0
+        elif current_position[1] < end[1]:
+            col_change = 1
+        else:
+            col_change = -1
+        current_position = (current_position[0] + row_change, current_position[1] + col_change)
 
 
 @dataclass

@@ -55,7 +55,7 @@ class HumanController(Controller):
                 hand_letters = []
                 for tile in self.hand_tiles:
                     hand_letters.append(tile.l)
-                self.move = Move(hand_letters, None, {})
+                self.move = Move(hand_letters, [], {})
                 self.finished_move = True
                 return
 
