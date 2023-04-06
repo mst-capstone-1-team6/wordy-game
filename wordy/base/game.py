@@ -61,7 +61,6 @@ class Move:
 
             if placement.word in computer_science_terms:
                 computer_science_term_count += 1
-        print(f"Intersection count: {intersection_count}")
         return score * (2 ** max(0, intersection_count - 1)) * (2 ** computer_science_term_count)
 
 
