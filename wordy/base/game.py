@@ -42,29 +42,27 @@ class Move:
     word_placement: List[WordPlacement]
     tile_placements: Dict[Position, Tile]
 
-    def score(self, computer_science_terms: Set[str]) -> int:
+    def score(self, board: Board, computer_science_terms: Set[str]) -> int:
+        intersection_count = 0
         score = 0
-        for tile in self.tile_placements.values():
-            letter_score = next(value for value, letters in LETTER_SCORING.items() if tile in letters)
-            score += letter_score
+        for position in self.tile_placements:
+            any_horizontal = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((0, 1), (0, -1)))
+            any_vertical = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((1, 0), (-1, 0)))
+            if any_horizontal:
+                intersection_count += 1
+            if any_vertical:
+                intersection_count += 1
 
-        intersection_multiplier = 1
         computer_science_term_count = 0
         for placement in self.word_placement:
-            segment_count = 0
-            was_last_tile_on_board: Optional[bool] = None
-            for position in over_positions(placement.word_start, placement.word_end):
-                tile_on_board = position not in self.tile_placements
-                if tile_on_board != was_last_tile_on_board:
-                    segment_count += 1
-                was_last_tile_on_board = tile_on_board
-            intersection_count = segment_count // 2  # divide by 2 and floor result
-            # 1 intersection is to be expected, so start gaining double points at 2 intersections
-            intersection_multiplier *= 2 ** max(0, intersection_count - 1)
+            for letter in placement.word:
+                letter_score = next(value for value, letters in LETTER_SCORING.items() if letter in letters)
+                score += letter_score
+
             if placement.word in computer_science_terms:
                 computer_science_term_count += 1
-        print(f"Multiplier: {intersection_multiplier}")
-        return score * intersection_multiplier * (2 ** computer_science_term_count)
+        print(f"Intersection count: {intersection_count}")
+        return score * (2 ** max(0, intersection_count - 1)) * (2 ** computer_science_term_count)
 
 
 class Controller(abc.ABC):
@@ -121,6 +119,6 @@ class Game:
             else:
                 current_player.passed_last_turn = False
 
+            current_player.score += move.score(self.board, self.computer_science_terms)
             self.board = self.board.place_tiles(move.tile_placements)
-            current_player.score += move.score(self.computer_science_terms)
             self.turn_index = (self.turn_index + 1) % len(self.players)
