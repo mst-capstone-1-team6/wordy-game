@@ -1,10 +1,20 @@
 import abc
 import random
 from dataclasses import dataclass
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 from typing import Optional
 
-from wordy.base.board import Board, Position, Tile, WordPlacement
+from wordy.base.board import Board, Position, Tile, WordPlacement, over_positions
+from wordy.base.worddict import WordDict
+
+LETTER_SCORING: Dict[int, Set[Tile]] = {
+    1: set("EAIONRTLSU"),
+    2: set("DG"),
+    3: set("BCMP"),
+    4: set("FHVWY"),
+    8: set("JX"),
+    10: set("QZ"),
+}
 
 
 class Player:
@@ -30,6 +40,30 @@ class Move:
     """The new hand of the player."""
     word_placement: List[WordPlacement]
     tile_placements: Dict[Position, Tile]
+
+    def score(self, computer_science_terms: Set[str]) -> int:
+        score = 0
+        for tile in self.tile_placements.values():
+            letter_score = next(value for value, letters in LETTER_SCORING.items() if tile in letters)
+            score += letter_score
+
+        intersection_multiplier = 1
+        computer_science_term_count = 0
+        for placement in self.word_placement:
+            segment_count = 0
+            was_last_tile_on_board: Optional[bool] = None
+            for position in over_positions(placement.word_start, placement.word_end):
+                tile_on_board = position not in self.tile_placements
+                if tile_on_board != was_last_tile_on_board:
+                    segment_count += 1
+                was_last_tile_on_board = tile_on_board
+            intersection_count = segment_count // 2  # divide by 2 and floor result
+            # 1 intersection is to be expected, so start gaining double points at 2 intersections
+            intersection_multiplier *= 2 ** max(0, intersection_count - 1)
+            if placement.word in computer_science_terms:
+                computer_science_term_count += 1
+        print(f"Multiplier: {intersection_multiplier}")
+        return score * intersection_multiplier * (2 ** computer_science_term_count)
 
 
 class Controller(abc.ABC):
@@ -62,10 +96,12 @@ class LetterBag:
 
 
 class Game:
-    def __init__(self, controllers: List[Controller]):
+    def __init__(self, controllers: List[Controller], word_dict: WordDict, computer_science_terms: Set[str]):
         self.board = Board(15, {})
         self.players: List[Tuple[Player, Controller]] = [(Player(), controller) for controller in controllers]
         """A list where each entry contains a Player object and a Controller object. The player object may be mutated to update score and a player's hand"""
+        self.word_dict = word_dict
+        self.computer_science_terms = computer_science_terms
         self.turn_index = 0
         self.letter_bag = LetterBag()
 
@@ -77,7 +113,7 @@ class Game:
         (current_player, current_controller) = self.current_player
         move = current_controller.make_move(self, current_player)
         if move is not None:
-            if move.new_hand == current_player.hand and move.word_placement is None:  # check if the player is passing their turn
+            if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
                 if current_player.passed_last_turn:
                     print("Hey! TODO end the game here! This is the second occurrence of this player passing their turn.")
                 current_player.passed_last_turn = True
@@ -85,5 +121,5 @@ class Game:
                 current_player.passed_last_turn = False
 
             self.board = self.board.place_tiles(move.tile_placements)
-            # do something and update board
+            current_player.score += move.score(self.computer_science_terms)
             self.turn_index = (self.turn_index + 1) % len(self.players)

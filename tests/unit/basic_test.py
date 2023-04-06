@@ -3,7 +3,7 @@
 
 import unittest
 
-from wordy.base.board import Board
+from wordy.base.board import Board, over_positions
 
 
 class TestBoard(unittest.TestCase):
@@ -15,6 +15,9 @@ class TestBoard(unittest.TestCase):
             (14, 14): "B",
         })
         print(str(board))
+
+    def test_over_positions(self):
+        assert [(0, 0), (1, 0), (2, 0)] == list(over_positions((0, 0), (2, 0)))
 
 
 if __name__ == '__main__':
