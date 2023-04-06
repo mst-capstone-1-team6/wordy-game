@@ -12,6 +12,7 @@ LETTER_SCORING: Dict[int, Set[Tile]] = {
     2: set("DG"),
     3: set("BCMP"),
     4: set("FHVWY"),
+    5: set("K"),
     8: set("JX"),
     10: set("QZ"),
 }
