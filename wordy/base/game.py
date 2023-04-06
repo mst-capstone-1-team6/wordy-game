@@ -45,13 +45,22 @@ class Move:
     def score(self, board: Board, computer_science_terms: Set[str]) -> int:
         intersection_count = 0
         score = 0
+        is_horizontal_placement = True
+        if len(self.tile_placements) >= 2:
+            placements = list(self.tile_placements.keys())
+            is_horizontal_placement = placements[0][0] == placements[1][0]
+        already_counted_same_streak = False
         for position in self.tile_placements:
             any_horizontal = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((0, 1), (0, -1)))
             any_vertical = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((1, 0), (-1, 0)))
-            if any_horizontal:
+            if any_horizontal and (not already_counted_same_streak or not is_horizontal_placement):
                 intersection_count += 1
-            if any_vertical:
+                if is_horizontal_placement:
+                    already_counted_same_streak = True
+            if any_vertical and (not already_counted_same_streak or is_horizontal_placement):
                 intersection_count += 1
+                if not is_horizontal_placement:
+                    already_counted_same_streak = True
 
         computer_science_term_count = 0
         for placement in self.word_placement:
@@ -61,6 +70,7 @@ class Move:
 
             if placement.word in computer_science_terms:
                 computer_science_term_count += 1
+        # print(f"Intersections: {intersection_count}")
         return score * (2 ** max(0, intersection_count - 1)) * (2 ** computer_science_term_count)
 
 
