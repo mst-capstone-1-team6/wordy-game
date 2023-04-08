@@ -10,19 +10,18 @@ def main():
 
     pygame.init()
 
-    display_width = 800
-    display_height = 600
+    display_width = 1000
+    display_height = 800
 
     game_display = pygame.display.set_mode((display_width, display_height))
     pygame.display.set_caption("Wordy Game")
 
     game_screen = TitleScreen()
-    game_screen = game_screen.next_screen()
 
     try:
         while True:
             game_screen.update(game_display)
-
+            game_screen = game_screen.next_screen()
 
             # TODO decide if we want to keep the call to update() here or if we should move it into Screen#update()
             pygame.display.update()
