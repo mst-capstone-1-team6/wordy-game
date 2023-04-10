@@ -32,7 +32,7 @@ class WordDict():
     @classmethod
     def from_list(cls, words: List[str]) -> WordDict:
         new = cls.__new__(cls)
-        new.words = words
+        new.words = [word.upper() for word in words]
         return new
 
 
@@ -76,12 +76,6 @@ class WordDict():
         temp = temp.trim_by_length(min = max_offset - min_offset)
         #Restrict words to only have the correct letters at the correct offsets
         results = []
-        for word in temp_words:
-            valid_start_offsets = set()
-            for word_index, word_letter in enumerate(word):
-                
-                if word_letter == first_let:
-                    valid
         for word in temp.words:
             valid_start_offsets = set()
             for word_index, word_starting_letter in enumerate(word):
