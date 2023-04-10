@@ -71,42 +71,26 @@ class WordDict():
         lets = [let.upper() for let in lets]
         max_offset = max(offsets)
         min_offset = min(offsets)
-        first_let = lets[offsets.index(min_offset)]
         #Generate list of all words containing the given letters of a valid length and letters
         temp = self.trim_by_letters(lets)
         temp = temp.trim_by_length(min = max_offset - min_offset)
         #Restrict words to only have the correct letters at the correct offsets
         results = []
         for word in temp.words:
-            #Create the lists of letter locations: adjusting for the offsets
-            pos_sets = []
-            for i, set_let in enumerate(lets):
-                temp_set = set()
-                for j, let in enumerate(word):
-                    if set_let == let:
-                        #Subtracting the offsets lines everything up to the index of the starting letter of that set of letters
-                        temp_set.add(j - offsets[i])
-                pos_sets.append(temp_set)
-            
-            if len(set.intersection(*pos_sets)) > 0:
-                #TODO: Fix this to return a vaid WordIfo containing the word and the set of posible start positions of the word
-                #This should be equivalent to the commented set-comprehension below it I think
-                """
-                start_set = set{}
-                for index in [i for i, x in enumerate(word) if x == first_let]:
-                    temp = []
-                    for i, let in enumerate(word[index:]):
-                        for j, offset in enumerate(offsets):
-                            if offset - min_offset == i:
-                                if lets[j] == let:
-                                    temp.append(1)
-                                else:
-                                    temp.append(0)
-                    if all(temp):
-                        start_set.add(min_offset - index)        
-                """
-                #results.append(WordInfo(word, start_set))
-                results.append(word)
+            valid_start_offsets = set()
+            for word_index, word_starting_letter in enumerate(word):
+                start_offset = min_offset - word_index
+                is_valid = True
+                for offset, placed_letter in zip(offsets, lets):
+                    index = offset - start_offset
+                    if index >= len(word) or word[index] != placed_letter:
+                        is_valid = False
+                        break
+                if is_valid:
+                    valid_start_offsets.add(start_offset)
+            if valid_start_offsets:
+                results.append(WordInfo(word, valid_start_offsets))
+
         return results
 
 
