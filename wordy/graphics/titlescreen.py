@@ -28,7 +28,7 @@ class TitleScreen(Screen):
 
     def next_screen(self) -> 'Screen':
         game = Game(
-            [HumanController("Player1"), HumanController("Player2"), HumanController("Player3"), HumanController("Player4")],
+            [HumanController("Player1", self.word_dict), HumanController("Player2", self.word_dict), HumanController("Player3", self.word_dict), HumanController("Player4", self.word_dict)],
             self.word_dict, self.computer_science_terms
         )
         return GameScreen(game)
