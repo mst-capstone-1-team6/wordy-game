@@ -77,6 +77,12 @@ class WordDict():
         temp = temp.trim_by_length(min = max_offset - min_offset)
         #Restrict words to only have the correct letters at the correct offsets
         results = []
+        for word in temp_words:
+            valid_start_offsets = set()
+            for word_index, word_letter in enumerate(word):
+                
+                if word_letter == first_let:
+                    valid
         for word in temp.words:
             #Create the lists of letter locations: adjusting for the offsets
             pos_sets = []
