@@ -13,16 +13,14 @@ from wordy.graphics.boarddisplay import BoardDisplay
 
 class GameScreen(Screen):
 
-    def __init__(self):
+    def __init__(self, game: Game):
         super().__init__()
+        self.game = game
         self.piece_size = 50
         self.menu = False
         self.rematch = False
         self.player_num = 0
 
-        # TODO Instantiate HumanControllers here or pass parameters through constructor so that the TitleScreen controls the type of Controllers present
-
-        self.game = Game([HumanController("Player 1"), HumanController("Player 2"), HumanController("Player 3"), HumanController("Player 4")])
         for p, c in self.game.players:
             c.draw_tiles(self.game.letter_bag)
 
