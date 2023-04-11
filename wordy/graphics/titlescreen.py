@@ -1,12 +1,12 @@
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pygame
-from pygame.sprite import Sprite, spritecollide, Group
 from pygame.rect import Rect
+from pygame.sprite import Sprite, spritecollide, Group
 
-from wordy.base.aicontroller import AIController, AI_CONTROLLER
+from wordy.base.aicontroller import AI_CONTROLLER
 from wordy.base.game import Game
 from wordy.base.worddict import file_to_set, WordDict
 from wordy.graphics import DISPLAY_WIDTH
@@ -78,18 +78,20 @@ class TitleScreen(Screen):
         self.cursor = _create_cursor()
 
         self.ui_display = Group()
-        self.player_slots = [(Group(), (DISPLAY_WIDTH / 2, 100 + i * 100)) for i in range(4)]
-        self.remove_button_groups = [Group() for _ in range(4)]
-        for group, (_, slot_position) in zip(self.remove_button_groups, self.player_slots):
+        self.player_slots: List[Tuple[Group, Tuple[int, int], Group, Tuple[int, int]]] = [
+            (Group(), (DISPLAY_WIDTH / 2 - 150, 100 + i * 100), Group(), (DISPLAY_WIDTH / 2 + 150, 100 + i * 100)) for i in range(4)
+        ]
+        """A list of (player group, player position, remove group, remove position)"""
+        for (_, _, group, remove_position) in self.player_slots:
             button = _create_button_remove()
             group.add(button)
-            _rect_center_to(button.rect, slot_position[0] + 250, slot_position[1])
+            _rect_center_to(button.rect, remove_position[0], remove_position[1])
         self.button_start_game = _create_button_start_game()
         _rect_center_to(self.button_start_game.rect, DISPLAY_WIDTH / 2, 600)
         self.button_add_human = _create_button_add_player()
         self.button_add_ai = _create_button_add_ai()
-        _rect_center_to(self.button_add_human.rect, DISPLAY_WIDTH / 2 - 200, 510)
-        _rect_center_to(self.button_add_ai.rect, DISPLAY_WIDTH / 2 + 200, 510)
+        _rect_center_to(self.button_add_human.rect, DISPLAY_WIDTH / 2 - 150, 510)
+        _rect_center_to(self.button_add_ai.rect, DISPLAY_WIDTH / 2 + 150, 510)
 
         self.ui_display.add(self.button_start_game)
         self.ui_display.add(self.button_add_human)
@@ -127,12 +129,11 @@ class TitleScreen(Screen):
                     self.update_players(self.players + [PlayerType.HUMAN])
                 elif self.button_add_ai in collision_sprites:
                     self.update_players(self.players + [PlayerType.AI])
-                for i, (slot_group, _) in enumerate(self.player_slots):
+                for i, (slot_group, _, remove_button_group, _) in enumerate(self.player_slots):
                     if spritecollide(self.cursor, slot_group, dokill=False):
                         new_players = list(self.players)
                         new_players.insert(0, new_players.pop(i))
                         self.update_players(new_players)
-                for i, remove_button_group in enumerate(self.remove_button_groups):
                     if spritecollide(self.cursor, remove_button_group, dokill=False):
                         self.update_players(self.players[:i] + self.players[i + 1:])
 
@@ -142,7 +143,7 @@ class TitleScreen(Screen):
         old_players = self.players
         self.players = new_players
         for i in range(4):
-            (slot_group, position) = self.player_slots[i]
+            (slot_group, position, _, _) = self.player_slots[i]
             old_player_type = old_players[i] if i < len(old_players) else None
             new_player_type = new_players[i] if i < len(new_players) else None
             if old_player_type != new_player_type:
@@ -174,10 +175,11 @@ class TitleScreen(Screen):
         self.__event_handler()
         game_display.fill((255, 255, 255))
         self.ui_display.draw(game_display)
-        for slot_group, _ in self.player_slots:
+        for slot_group, _, _, _ in self.player_slots:
             slot_group.draw(game_display)
         for i, _ in enumerate(self.players):
-            self.remove_button_groups[i].draw(game_display)
+            (_, _, remove_button_group, _) = self.player_slots[i]
+            remove_button_group.draw(game_display)
 
     def next_screen(self) -> 'Screen':
         return self.__next_screen
