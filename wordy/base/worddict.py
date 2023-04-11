@@ -36,6 +36,21 @@ class WordDict():
         return new
 
 
+    @classmethod
+    def can_be_spelled(word, letters: List) -> bool:
+        for l in word.upper():
+            if l not in letters: 
+                return False
+            else: 
+                letters.delete(l) 
+        return True
+    
+
+    def trim_by_hand(self, hand: List) -> WordDict:
+        """Returns a new dictionary which contains only the words in self which can be spelled with letters given"""
+        return WordDict.from_list([word for word in self.words if WordDict.can_be_spelled(word, hand)])
+
+
     def trim_by_length(self, min: int = 0, max: int = 15) -> WordDict:
         """Returns a new dictonary which contains only the words in self which fall between the given lengths"""
         return WordDict.from_list([word for word in self.words if len(word) < max and len(word) > min])
