@@ -62,22 +62,27 @@ class Move:
             horizontal_front = board.tile_at((position[0], position[1] + 1)) is not None
             vertical_behind = board.tile_at((position[0] - 1, position[1])) is not None
             vertical_front = board.tile_at((position[0] + 1, position[1])) is not None
-            if i == 0:
-                # for the first position, check to see if there's tiles "behind" us
-                if (is_horizontal_placement and horizontal_behind) or (not is_horizontal_placement and vertical_behind):
+
+            if i == 0 and next_position is None:  # special case for a single tile being placed
+                intersection_count += min(2, [horizontal_front, horizontal_behind, vertical_front, vertical_behind].count(True))
+            else:
+                if i == 0:
+                    # for the first position, check to see if there's tiles "behind" us
+                    if (is_horizontal_placement and horizontal_behind) or (not is_horizontal_placement and vertical_behind):
+                        intersection_count += 1
+                        # print(f"({i}) before")
+                elif next_position is None:
+                    # for the last position, check to see if there's tiles "in front" of us
+                    if (is_horizontal_placement and horizontal_front) or (not is_horizontal_placement and vertical_front):
+                        intersection_count += 1
+                        # print(f"({i}) after")
+                if (
+                    ((horizontal_behind or horizontal_front) and not is_horizontal_placement)
+                    or ((vertical_behind or vertical_front) and is_horizontal_placement)
+                ):
                     intersection_count += 1
-                    # print(f"({i}) before")
-            if next_position is None:  # note: this if statement is effectively an elif unless one letter is being placed
-                # for the last position, check to see if there's tiles "in front" of us
-                if (is_horizontal_placement and horizontal_front) or (not is_horizontal_placement and vertical_front):
-                    intersection_count += 1
-                    # print(f"({i}) after")
-            if (
-                ((horizontal_behind or horizontal_front) and not is_horizontal_placement)
-                or ((vertical_behind or vertical_front) and is_horizontal_placement)
-            ):
-                intersection_count += 1
-                # print(f"({i}) above or below")
+
+                    # print(f"({i}) above or below")
 
         computer_science_term_count = 0
         for placement in self.word_placement:
