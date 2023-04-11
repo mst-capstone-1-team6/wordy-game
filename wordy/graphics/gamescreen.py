@@ -21,7 +21,8 @@ class GameScreen(Screen):
         self.ref_board = {}
 
         for p, c in self.game.players:
-            c.draw_tiles(self.game.letter_bag)
+            if isinstance(c, HumanController):
+                c.draw_tiles(self.game.letter_bag)
 
         self.ET_button = Button((self.piece_size * 15.5), (self.piece_size * 13.5), 200, 80, "END TURN")
         self.NH_button = Button((self.piece_size * 15.5), (self.piece_size * 11.5), 200, 80, "NEW HAND")
@@ -39,6 +40,7 @@ class GameScreen(Screen):
         for event in pygame.event.get():
             common_handle_event(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
+                assert isinstance(controller, HumanController)
 
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
