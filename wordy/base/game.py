@@ -49,18 +49,35 @@ class Move:
         if len(self.tile_placements) >= 2:
             placements = list(self.tile_placements.keys())
             is_horizontal_placement = placements[0][0] == placements[1][0]
-        already_counted_same_streak = False
-        for position in self.tile_placements:
-            any_horizontal = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((0, 1), (0, -1)))
-            any_vertical = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((1, 0), (-1, 0)))
-            if any_horizontal and (not already_counted_same_streak or not is_horizontal_placement):
+
+        ordered_tile_placement_positions = sorted(self.tile_placements.keys())
+        for i, position in enumerate(ordered_tile_placement_positions):
+            next_position = ordered_tile_placement_positions[i + 1] if i + 1 < len(ordered_tile_placement_positions) else None
+            any_between = len(list(over_positions(position, next_position))) > 2 if next_position is not None else False
+            if any_between:
                 intersection_count += 1
-                if is_horizontal_placement:
-                    already_counted_same_streak = True
-            if any_vertical and (not already_counted_same_streak or is_horizontal_placement):
+                # print(f"({i}) between")
+
+            horizontal_behind = board.tile_at((position[0], position[1] - 1)) is not None
+            horizontal_front = board.tile_at((position[0], position[1] + 1)) is not None
+            vertical_behind = board.tile_at((position[0] - 1, position[1])) is not None
+            vertical_front = board.tile_at((position[0] + 1, position[1])) is not None
+            if i == 0:
+                # for the first position, check to see if there's tiles "behind" us
+                if (is_horizontal_placement and horizontal_behind) or (not is_horizontal_placement and vertical_behind):
+                    intersection_count += 1
+                    # print(f"({i}) before")
+            if next_position is None:  # note: this if statement is effectively an elif unless one letter is being placed
+                # for the last position, check to see if there's tiles "in front" of us
+                if (is_horizontal_placement and horizontal_front) or (not is_horizontal_placement and vertical_front):
+                    intersection_count += 1
+                    # print(f"({i}) after")
+            if (
+                ((horizontal_behind or horizontal_front) and not is_horizontal_placement)
+                or ((vertical_behind or vertical_front) and is_horizontal_placement)
+            ):
                 intersection_count += 1
-                if not is_horizontal_placement:
-                    already_counted_same_streak = True
+                # print(f"({i}) above or below")
 
         computer_science_term_count = 0
         for placement in self.word_placement:
