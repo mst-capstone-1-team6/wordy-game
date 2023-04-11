@@ -17,18 +17,30 @@ class GameScreen(Screen):
         super().__init__()
         self.game = game
         self.piece_size = 50
-
-        self.ref_board = {}
+        self.menu = False
+        self.rematch = False
+        self.player_num = 0
 
         for p, c in self.game.players:
             c.draw_tiles(self.game.letter_bag)
 
-        self.ET_button = Button((self.piece_size * 15.5), (self.piece_size * 13.5), 200, 80, "END TURN")
-        self.NH_button = Button((self.piece_size * 15.5), (self.piece_size * 11.5), 200, 80, "NEW HAND")
-        self.UIdisplay = pygame.sprite.Group()
-        self.UIdisplay.add(BoardDisplay(0, 0, 15, self.piece_size))
-        self.UIdisplay.add(self.ET_button)
-        self.UIdisplay.add(self.NH_button)
+        self.ET_button = Button((self.piece_size * 15.65), (self.piece_size * 13.45), 190, 76, "END TURN")
+        self.NH_button = Button((self.piece_size * 15.65), (self.piece_size * 11.85), 190, 76, "NEW HAND")
+        self.AR_button = Button((self.piece_size * 17), (self.piece_size * 10.4), 50, 50, "Arrow")
+        self.CT_button = Button((self.piece_size * 15.65), (self.piece_size * 8), 190, 76, "Continue")
+        self.RM_button = Button((self.piece_size * 15.65), (self.piece_size * 13.45), 190, 76, "Rematch")
+        self.ME_button = Button((self.piece_size * 15.65), (self.piece_size * 11.85), 190, 76, "Menu")
+        self.GameUI = pygame.sprite.Group()
+        self.BoardUI = pygame.sprite.Group()
+        self.EndUI = pygame.sprite.Group()
+        self.TurnUI = pygame.sprite.Group()
+        self.BoardUI.add(BoardDisplay(0, 0, 15, self.piece_size))
+        self.GameUI.add(self.ET_button)
+        self.GameUI.add(self.NH_button)
+        self.GameUI.add(self.AR_button)
+        self.TurnUI.add(self.CT_button)
+        self.EndUI.add(self.RM_button)
+        self.EndUI.add(self.ME_button)
 
         self.board_tiles = pygame.sprite.LayeredUpdates()  # Holds all the tile sprite
         self.cursor = Cursor()  # Just a sprite to represent the cursor
@@ -45,7 +57,14 @@ class GameScreen(Screen):
                 # Gets all the tiles that collide with the cursor
                 sprite_collides = pygame.sprite.spritecollide(self.cursor, controller.hand_tiles, False)
 
-                if event.button == 1 and sprite_collides:
+                if event.button == 1 and self.CT_button.rect.colliderect(self.cursor.rect) and not self.player_num == self.game.turn_index:
+                    self.player_num = self.game.turn_index
+                elif event.button == 1 and self.ME_button.rect.colliderect(self.cursor.rect) and self.game.end_condition:
+                    self.menu = True
+                elif event.button == 1 and self.RM_button.rect.colliderect(self.cursor.rect) and self.game.end_condition:
+                    self.rematch = True
+
+                elif event.button == 1 and sprite_collides and self.player_num == self.game.turn_index:
                     s = sprite_collides[len(sprite_collides) - 1]  # Only selects the top most tile
                     controller.hand_tiles.move_to_front(s)
                     s.dragging = True
@@ -53,7 +72,8 @@ class GameScreen(Screen):
                     s.off_x = s.rect.x - self.cursor.rect.x
                     s.off_y = s.rect.y - self.cursor.rect.y
                     s.forming_word = True
-                elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect):
+
+                elif event.button == 1 and self.ET_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
                     # If the submit word button pressed, check if the move is valid
                     hand_letters = []
                     for tile in controller.hand_tiles:
@@ -61,7 +81,7 @@ class GameScreen(Screen):
                     player.hand = hand_letters
                     controller.end_turn(self.game.board, self.game.letter_bag)
 
-                elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect):
+                elif event.button == 1 and self.NH_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
                     # If the new hand button pressed, give the player a new hand
                     hand_letters = []
                     for tile in controller.hand_tiles:
@@ -69,6 +89,9 @@ class GameScreen(Screen):
                     player.hand = hand_letters
                     controller.new_hand(self.game.letter_bag)
                     controller.end_turn(self.game.board, self.game.letter_bag)
+
+                elif event.button == 1 and self.AR_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
+                    controller.return_tiles()
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.cursor.rect.x = event.pos[0]
@@ -117,6 +140,7 @@ class GameScreen(Screen):
         self.game.update()
 
         if len(self.board_tiles.sprites()) != self.game.board.num_tiles():
+            self.between_turns = True
             self.board_tiles = pygame.sprite.LayeredUpdates()
             for i in range(self.game.board.size):
                 for j in range(self.game.board.size):
@@ -126,7 +150,8 @@ class GameScreen(Screen):
         game_display.fill((255, 255, 255))
 
         # Draw the UI elements
-        self.UIdisplay.draw(game_display)
+        self.BoardUI.draw(game_display)
+
 
         # Draw the tiles on the board
         self.board_tiles.draw(game_display)
@@ -134,30 +159,63 @@ class GameScreen(Screen):
         (player, controller) = self.game.current_player
 
         pygame.font.init()
-        font = pygame.font.SysFont('Comic Sans MS', 40)
+        font = pygame.font.Font('assets/ARIALBD.TTF', 28)
 
-        if isinstance(controller, HumanController):
+        if self.game.end_condition:
+            font = pygame.font.Font('assets/ARIALBD.TTF', 50)
+            text_surface = font.render("GAME", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 2))
+            text_surface = font.render("OVER", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 3))
+            font = pygame.font.Font('assets/ARIALBD.TTF', 35)
+            text_surface = font.render("Final Scores:", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 5))
+            p: Player
+            c: Controller
+            for i in range(len(self.game.players)):
+                (p, c) = self.game.players[i]
+                if isinstance(c, AIController):
+                    text_surface = font.render("AI: " + str(p.score), True, (0, 0, 0))
+                else:
+                    text_surface = font.render(c.name + ": " + str(p.score), True, (0, 0, 0))
+                game_display.blit(text_surface, (750 + (125-(text_surface.get_rect().size[0]/2)), self.piece_size * (7+(1*i))))
+            self.EndUI.draw(game_display)
 
-            controller.hand_tiles.draw(game_display)
-            controller.hand_tiles.update(game_display)
 
-            # Display current player's name
-            text_surface = font.render(controller.name, True, (0, 0, 0))
-            game_display.blit(text_surface, (self.piece_size * 16.5, self.piece_size * 2))
+        elif isinstance(controller, HumanController):
 
             # Display how many tiles left in the bag
             text_surface = font.render(str(len(self.game.letter_bag.letters)) + " letters left", True, (0, 0, 0))
-            game_display.blit(text_surface, (self.piece_size * 16, self.piece_size * 0))
+            game_display.blit(text_surface, (self.piece_size * 15.7, self.piece_size * 0.2))
 
-        p: Player
-        c: Controller
-        for i in range(len(self.game.players)):
-            (p, c) = self.game.players[i]
-            if isinstance(c, AIController):
-                text_surface = font.render("Computer: " + str(p.score), True, (0, 0, 0))
+            p: Player
+            c: Controller
+            for i in range(len(self.game.players)):
+                (p, c) = self.game.players[i]
+                if isinstance(c, AIController):
+                    text_surface = font.render("AI: " + str(p.score), True, (0, 0, 0))
+                else:
+                    text_surface = font.render(c.name + ": " + str(p.score), True, (0, 0, 0))
+                game_display.blit(text_surface, (self.piece_size * (0.3 + (5 * i)), self.piece_size * 15.2))
+
+            if not self.player_num == self.game.turn_index:
+                self.TurnUI.draw(game_display)
+                text_surface = font.render("It is now", True, (0, 0, 0))
+                game_display.blit(text_surface, (750 + (125-(text_surface.get_rect().size[0]/2)), self.piece_size * 5.8))
+                text_surface = font.render(controller.name + "'s", True, (0, 0, 0))
+                game_display.blit(text_surface, (750 + (125-(text_surface.get_rect().size[0]/2)), self.piece_size * 6.4))
+                text_surface = font.render("turn", True, (0, 0, 0))
+                game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 7))
+
             else:
-                text_surface = font.render(c.name + ": " + str(p.score), True, (0, 0, 0))
-            game_display.blit(text_surface, (self.piece_size * (1+(4*i)), self.piece_size * 15.3))
+                self.GameUI.draw(game_display)
+
+                # Display current player's name
+                text_surface = font.render(controller.name, True, (0, 0, 0))
+                game_display.blit(text_surface, (750 + (125-(text_surface.get_rect().size[0]/2)), self.piece_size * 2))
+
+                controller.hand_tiles.draw(game_display)
+                controller.hand_tiles.update(game_display)
 
         # there is a player whose turn it is
         # there is a controller corresponding to that player
@@ -166,6 +224,11 @@ class GameScreen(Screen):
         # TODO check if the game has ended. If it has, then display a pop up showing results (winner or tie) of the game
 
     def next_screen(self) -> 'Screen':
+        from wordy.graphics.titlescreen import TitleScreen
         # TODO return something other than self when the game has ended. (Likely will return an instance of a TitleScreen)
+        if self.game.end_condition and self.menu:
+            return TitleScreen()
+        if self.game.end_condition and self.rematch:
+            return GameScreen()
         return self
 
