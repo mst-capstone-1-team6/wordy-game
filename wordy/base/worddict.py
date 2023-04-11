@@ -37,12 +37,12 @@ class WordDict():
 
 
     @classmethod
-    def can_be_spelled(word, letters: List) -> bool:
+    def can_be_spelled(cls, word, letters: List) -> bool:
         for l in word.upper():
             if l not in letters: 
                 return False
             else: 
-                letters.delete(l) 
+                letters.remove(l) 
         return True
     
 
