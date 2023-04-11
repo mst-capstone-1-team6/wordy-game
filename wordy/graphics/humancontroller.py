@@ -106,7 +106,8 @@ class HumanController(Controller):
 
     def draw_tiles(self, letter_bag: LetterBag):
         for i in self.empty_spots:
-            self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile(), False))
+            if not len(letter_bag.letters) == 0:
+                self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile(), False))
         self.empty_spots = []
 
     def return_tiles(self):
