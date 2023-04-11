@@ -79,6 +79,11 @@ class TitleScreen(Screen):
 
         self.ui_display = Group()
         self.player_slots = [(Group(), (DISPLAY_WIDTH / 2, 100 + i * 100)) for i in range(4)]
+        self.remove_button_groups = [Group() for _ in range(4)]
+        for group, (_, slot_position) in zip(self.remove_button_groups, self.player_slots):
+            button = _create_button_remove()
+            group.add(button)
+            _rect_center_to(button.rect, slot_position[0] + 250, slot_position[1])
         self.button_start_game = _create_button_start_game()
         _rect_center_to(self.button_start_game.rect, DISPLAY_WIDTH / 2, 600)
         self.button_add_human = _create_button_add_player()
@@ -96,9 +101,11 @@ class TitleScreen(Screen):
 
     def __start_game(self):
         controllers = []
+        player_count = 1
         for player_type in self.players:
             if player_type == PlayerType.HUMAN:
-                controllers.append(HumanController("player", self.word_dict))
+                controllers.append(HumanController(f"Player {player_count}", self.word_dict))
+                player_count += 1
             else:
                 controllers.append(AI_CONTROLLER)
         # controllers = [HumanController("Player1", self.word_dict), HumanController("Player2", self.word_dict),
@@ -125,6 +132,9 @@ class TitleScreen(Screen):
                         new_players = list(self.players)
                         new_players.insert(0, new_players.pop(i))
                         self.update_players(new_players)
+                for i, remove_button_group in enumerate(self.remove_button_groups):
+                    if spritecollide(self.cursor, remove_button_group, dokill=False):
+                        self.update_players(self.players[:i] + self.players[i + 1:])
 
     def update_players(self, new_players: List[PlayerType]):
         if not (2 <= len(new_players) <= 4):
@@ -141,7 +151,7 @@ class TitleScreen(Screen):
                     sprite = slot_group.sprites()[0]
                     slot_group.remove(sprite)
                     old_sprites.append(sprite)
-                    print("removed old")
+                    # print("removed old")
                 if new_player_type is not None:
                     if new_player_type == PlayerType.HUMAN:
                         sprite = self.sprite_pool_player.pop()
@@ -151,7 +161,7 @@ class TitleScreen(Screen):
                         raise AssertionError()
                     _rect_center_to(sprite.rect, position[0], position[1])
                     slot_group.add(sprite)
-                    print(f"({i}) added new {new_player_type}")
+                    # print(f"({i}) added new {new_player_type}")
 
                 if old_player_type == PlayerType.HUMAN:
                     for sprite in old_sprites:
@@ -166,6 +176,8 @@ class TitleScreen(Screen):
         self.ui_display.draw(game_display)
         for slot_group, _ in self.player_slots:
             slot_group.draw(game_display)
+        for i, _ in enumerate(self.players):
+            self.remove_button_groups[i].draw(game_display)
 
     def next_screen(self) -> 'Screen':
         return self.__next_screen
