@@ -13,9 +13,10 @@ from wordy.graphics.boarddisplay import BoardDisplay
 
 class GameScreen(Screen):
 
-    def __init__(self, game: Game):
+    def __init__(self, game: Game, return_screen: Screen):
         super().__init__()
         self.game = game
+        self.return_screen = return_screen
         self.piece_size = 50
         self.menu = False
         self.rematch = False
@@ -52,6 +53,7 @@ class GameScreen(Screen):
         for event in pygame.event.get():
             common_handle_event(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
+                assert isinstance(controller, HumanController)
 
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
@@ -226,11 +228,10 @@ class GameScreen(Screen):
         # TODO check if the game has ended. If it has, then display a pop up showing results (winner or tie) of the game
 
     def next_screen(self) -> 'Screen':
-        from wordy.graphics.titlescreen import TitleScreen
-        # TODO return something other than self when the game has ended. (Likely will return an instance of a TitleScreen)
         if self.game.end_condition and self.menu:
-            return TitleScreen()
+            return self.return_screen
         if self.game.end_condition and self.rematch:
-            return GameScreen()
+            new_game = Game([controller for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
+            return GameScreen(new_game, self.return_screen)
         return self
 
