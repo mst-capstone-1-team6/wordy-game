@@ -120,8 +120,11 @@ class LetterBag:
                    'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
                    'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
 
-    def get_tile(self) -> Tile:
-        return self.letters.pop(random.randrange(len(self.letters)))
+    def get_tile(self):
+        if len(self.letters) > 0:
+            return self.letters.pop(random.randrange(len(self.letters)))
+        else:
+            return None
 
     def return_tile(self, tile: Tile):
         self.letters.append(tile)
@@ -136,6 +139,7 @@ class Game:
         self.computer_science_terms = computer_science_terms
         self.turn_index = 0
         self.letter_bag = LetterBag()
+        print(len(self.letter_bag.letters))
         self.end_condition = False
 
     @property
@@ -144,16 +148,19 @@ class Game:
 
     def update(self):
         (current_player, current_controller) = self.current_player
-        move = current_controller.make_move(self, current_player)
-        if move is not None:
-            if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
-                all_others_have_passed = all(player.passed_last_turn for player, _ in self.players[:self.turn_index] + self.players[self.turn_index + 1:])
-                if all_others_have_passed:
-                    self.end_condition = True
-                current_player.passed_last_turn = True
-            else:
-                current_player.passed_last_turn = False
 
-            current_player.score += move.score(self.board, self.computer_science_terms)
-            self.board = self.board.place_tiles(move.tile_placements)
-            self.turn_index = (self.turn_index + 1) % len(self.players)
+        if not self.end_condition:
+            move = current_controller.make_move(self, current_player)
+            if move is not None:
+                if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
+                    all_others_have_passed = all(player.passed_last_turn for player, _ in self.players[:self.turn_index] + self.players[self.turn_index + 1:])
+                    if all_others_have_passed:
+                        self.end_condition = True
+                    current_player.passed_last_turn = True
+                else:
+                    current_player.passed_last_turn = False
+
+                current_player.score += move.score(self.board, self.computer_science_terms)
+                current_player.hand = move.new_hand
+                self.board = self.board.place_tiles(move.tile_placements)
+                self.turn_index = (self.turn_index + 1) % len(self.players)
