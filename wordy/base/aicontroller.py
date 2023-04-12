@@ -16,7 +16,9 @@ class AIController(Controller):
     def draw_tiles(self, num_tiles: int, letter_bag: LetterBag):
         tiles = []
         for i in range(num_tiles):
-            tiles.append(letter_bag.get_tile())
+            temp_thing = letter_bag.get_tile()
+            if temp_thing is not None:
+                tiles.append(temp_thing)
         return tiles
 
     def valid_board(self, game: Game, move: Move):
