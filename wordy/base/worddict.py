@@ -45,6 +45,12 @@ class WordDict():
     def trim_by_hand(self, hand: List) -> WordDict:
         """Returns a new dictionary which contains only the words in self which can be spelled with letters given"""
         return WordDict.from_list([word for word in self.words if WordDict.can_be_spelled(word, hand)])
+    
+
+    def trim_by_hand(self, hand: List) -> WordDict:
+        """Returns a new dictionary which contains only the words in self which can be spelled with letters given"""
+        return WordDict.from_list([word for word in self.words if WordDict.can_be_spelled(word, hand)])
+
 
     def trim_by_length(self, min: int = 0, max: int = 15) -> WordDict:
         """Returns a new dictonary which contains only the words in self which fall between the given lengths"""
@@ -61,9 +67,9 @@ class WordDict():
         """Find all words in the dictionary which contain the given letter and their start positions on the board
            eg. find_one_letter("a", 4) will return a list like [WordInfo("apple", {4}), WordInfo("watermelon", {3}), WordInfo("year", {2}), ...]"""
         set_let = set_let.upper()
-        # Generate list of all words containing the given letter
+        #Generate list of all words containing the given letter
         temp = [word for word in self.words if word.find(set_let) != -1]
-        # Restrict words to only contain the letter at the given indexes
+        #Restrict words to only contain the letter at the given indexes
         results = []
         for word in temp:
             index_set = set()
