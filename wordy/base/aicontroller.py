@@ -1,4 +1,5 @@
 from typing import Optional, List, Tuple
+import copy
 
 import pygame.sprite
 
@@ -32,6 +33,7 @@ class AIController(Controller):
         best_score = 0
         which_move = 0
         move_index = 0
+        temp_tile_placements = {}
         for curr_move in possible_moves:
             temp_letters = []
             letter_pos = []
@@ -40,9 +42,6 @@ class AIController(Controller):
             if length == 0:
                 direction = "horizontal"
                 length = curr_move[1][1] - curr_move[0][1]
-            #temp_dict = game.word_dict.trim_by_length(0, length)
-            #temp_dict = temp_dict.trim_by_letters(hand_letters)
-            #print(temp_dict.words)
             temp_pos = list(curr_move[0])
             for i in range(length):
                 if game.board.tile_at(tuple(temp_pos)) is not None:
@@ -53,7 +52,7 @@ class AIController(Controller):
                 else:
                     temp_pos[0] = temp_pos[0] + 1
             temp_dict = game.word_dict.trim_by_length(0, length)
-            print(temp_dict.words, "temP_dict.words")
+            #print(temp_dict.words, "temP_dict.words")
             #temp_dict = temp_dict.trim_by_letters(hand_letters+temp_letters)
             temp_pos = list(curr_move[0])
             temp_hand_letters = [str(tile) for tile in hand_letters]
@@ -82,11 +81,11 @@ class AIController(Controller):
             #print(temp_dict2)
             for word in temp_dict2:
                 valid_words.append(word)
-            print(valid_words)
+            #print(valid_words)
             if len(valid_words) > 0:
                 for word in valid_words:
                     temp_hand_tiles = hand_letters
-                    temp_tile_placements = tile_placements
+                    temp_tile_placements = copy.deepcopy(tile_placements)
                     curr_offset = word.start_offsets.pop()
                     while True and word.start_offsets:
                         if curr_offset < 0:
@@ -102,6 +101,7 @@ class AIController(Controller):
                             key = (curr_offset+i, curr_move[0][1])
                         if game.board.tile_at(key) is None and letter in temp_hand_letters:
                             temp_index = temp_hand_letters.index(letter)
+                            #print(temp_hand_tiles, "tiles")
                             value = temp_hand_tiles[temp_index]
                             pair = (key, value)
                             temp_tile_placements.update([pair])
@@ -109,8 +109,13 @@ class AIController(Controller):
                     for i in range(len(letter_pos)):
                         if tuple(letter_pos[i]) in temp_tile_placements.keys():
                             temp_tile_placements.pop(tuple(letter_pos[i]))
+                    temp_hand_tiles2 = [tiles for tiles in temp_hand_tiles]
+                    for i in word.word_str:
+                        if i in temp_hand_tiles2 and i not in temp_letters:
+                            temp_hand_tiles2.remove(i)
+                    #print(temp_hand_tiles, "handtiles 2")
                         #hand_letters.remove(word(i)
-                    move_choices.append(Move(temp_hand_tiles, game.board.get_words(temp_tile_placements), temp_tile_placements))
+                    move_choices.append(Move(temp_hand_tiles2, game.board.get_words(temp_tile_placements), temp_tile_placements))
                 best_score = 0
                 which_move = 0
                 move_index = 0
@@ -128,8 +133,13 @@ class AIController(Controller):
             if move.score(game.board, game.computer_science_terms) > best_score:
                 best_score = move.score(game.board, game.computer_science_terms)
                 move_index = which_move - 1
+        print(best_score, "best score")
         print(move_index, "move index")
         if len(best_move_choices) > 0:
+            for tile in player.hand:
+                if tile in best_move_choices[move_index].tile_placements:
+                    player.hand.remove(tile)
+            print(best_move_choices[move_index])
             print(len(best_move_choices), "length of best moves")
             best_move = best_move_choices[move_index]
             return best_move
