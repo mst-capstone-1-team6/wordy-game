@@ -17,6 +17,13 @@ morales
 taylor
 price
 
+foo
+bar
+fizz
+buzz
+fizzbuzz
+fibonacci
+
 abstract
 data
 type
