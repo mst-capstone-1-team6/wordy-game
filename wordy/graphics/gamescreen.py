@@ -13,16 +13,18 @@ from wordy.graphics.boarddisplay import BoardDisplay
 
 class GameScreen(Screen):
 
-    def __init__(self, game: Game):
+    def __init__(self, game: Game, return_screen: Screen):
         super().__init__()
         self.game = game
+        self.return_screen = return_screen
         self.piece_size = 50
         self.menu = False
         self.rematch = False
         self.player_num = 0
 
         for p, c in self.game.players:
-            c.draw_tiles(self.game.letter_bag)
+            if isinstance(c, HumanController):
+                c.draw_tiles(self.game.letter_bag)
 
         self.ET_button = Button((self.piece_size * 15.65), (self.piece_size * 13.45), 190, 76, "END TURN")
         self.NH_button = Button((self.piece_size * 15.65), (self.piece_size * 11.85), 190, 76, "NEW HAND")
@@ -51,6 +53,7 @@ class GameScreen(Screen):
         for event in pygame.event.get():
             common_handle_event(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
+                assert isinstance(controller, HumanController)
 
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
@@ -93,7 +96,7 @@ class GameScreen(Screen):
                 elif event.button == 1 and self.AR_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
                     controller.return_tiles()
 
-            elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP and isinstance(controller, HumanController):
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
                 for s in controller.hand_tiles:  # Loop over all tiles to find the one being dragged
@@ -122,10 +125,11 @@ class GameScreen(Screen):
             elif event.type == pygame.MOUSEMOTION:
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
-                for s in controller.hand_tiles:  # Update the position of a dragged tile
-                    if s.dragging:
-                        s.rect.x = self.cursor.rect.x + s.off_x
-                        s.rect.y = self.cursor.rect.y + s.off_y
+                if isinstance(controller, HumanController):
+                    for s in controller.hand_tiles:  # Update the position of a dragged tile
+                        if s.dragging:
+                            s.rect.x = self.cursor.rect.x + s.off_x
+                            s.rect.y = self.cursor.rect.y + s.off_y
 
     def update(self, game_display):
         self.__event_handler()
@@ -224,11 +228,10 @@ class GameScreen(Screen):
         # TODO check if the game has ended. If it has, then display a pop up showing results (winner or tie) of the game
 
     def next_screen(self) -> 'Screen':
-        from wordy.graphics.titlescreen import TitleScreen
-        # TODO return something other than self when the game has ended. (Likely will return an instance of a TitleScreen)
         if self.game.end_condition and self.menu:
-            return TitleScreen()
+            return self.return_screen
         if self.game.end_condition and self.rematch:
-            return GameScreen()
+            new_game = Game([controller for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
+            return GameScreen(new_game, self.return_screen)
         return self
 

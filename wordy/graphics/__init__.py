@@ -1,5 +1,6 @@
 import pygame
 
+from wordy.graphics.constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 from wordy.graphics.titlescreen import TitleScreen
 
 
@@ -10,10 +11,7 @@ def main():
 
     pygame.init()
 
-    display_width = 1000
-    display_height = 800
-
-    game_display = pygame.display.set_mode((display_width, display_height))
+    game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
     pygame.display.set_caption("Wordy Game")
 
     game_screen = TitleScreen()
