@@ -1,5 +1,5 @@
 from typing import Optional, List, Tuple
-import copy
+from copy import deepcopy
 
 import pygame.sprite
 
@@ -27,11 +27,14 @@ class AIController(Controller):
 
     def make_move(self, game: Game, player: Player) -> Optional[Move]:
         num_tiles = 7 - len(player.hand)
-        hand_letters = self.draw_tiles(num_tiles, game.letter_bag) + player.hand
+        drawn_tiles = self.draw_tiles(num_tiles, game.letter_bag)
+        print(player.hand, num_tiles, drawn_tiles)
+        player.hand = drawn_tiles + player.hand
+        hand_letters = deepcopy(player.hand)
         possible_moves = valid_moves(game.board)
         move_choices = []
         best_move_choices = []
-        print(hand_letters)
+        #print(hand_letters)
         tile_placements = {}
         temp_indexes = []
         temp_pos = []
@@ -61,14 +64,16 @@ class AIController(Controller):
             best_score = 0
             which_move = 0
             move_index = 0
-            print(temp_dict.words)
+            #print(temp_dict.words)
             for move in moves:
                 which_move = which_move + 1
                 if move.score(game.board, game.computer_science_terms) > best_score and self.valid_board(game, move):
                     best_score = move.score(game.board, game.computer_science_terms)
                     move_index = which_move - 1
-            print(moves[move_index])
-            return moves[move_index]
+            #print(moves[move_index])
+            move = moves[move_index]
+            player.hand = move.new_hand
+            return move
 
         for curr_move in possible_moves:
             temp_letters = []
@@ -117,7 +122,7 @@ class AIController(Controller):
             if len(valid_words) > 0:
                 for word in valid_words:
                     temp_hand_tiles = hand_letters
-                    temp_tile_placements = copy.deepcopy(tile_placements)
+                    temp_tile_placements = deepcopy(tile_placements)
                     curr_offset = 0
                     temp_bool = False
                     # curr_offset = word.start_offsets.pop()
@@ -145,11 +150,11 @@ class AIController(Controller):
                     for i in range(len(letter_pos)):
                         if tuple(letter_pos[i]) in temp_tile_placements.keys():
                             temp_tile_placements.pop(tuple(letter_pos[i]))
-                    temp_hand_tiles2 = [tiles for tiles in temp_hand_tiles]
+                    temp_hand_tiles2 = [tiles for tiles in hand_letters]
                     for i in word.word_str:
                         if i in temp_hand_tiles2 and i not in temp_letters:
                             temp_hand_tiles2.remove(i)
-                    # print(temp_hand_tiles, "handtiles 2")
+                    #print(temp_hand_tiles2, "handtiles 2")
                     temp_move = Move(temp_hand_tiles2, game.board.get_words(temp_tile_placements), temp_tile_placements)
                     if self.valid_board(game, temp_move):
                         move_choices.append(temp_move)
@@ -168,18 +173,15 @@ class AIController(Controller):
         move_index = 0
         for move in best_move_choices:
             which_move = which_move + 1
-            if move.score(game.board, game.computer_science_terms) > best_score:
-                best_score = move.score(game.board, game.computer_science_terms)
+            move_score = move.score(game.board, game.computer_science_terms)
+            if move_score > best_score:
+                best_score = move_score
                 move_index = which_move - 1
         # print(best_score, "best score")
-        print(move_index, "move index")
+        #print(move_index, "move index")
         if len(best_move_choices) > 0:
-            for tile in player.hand:
-                if tile in best_move_choices[move_index].tile_placements:
-                    player.hand.remove(tile)
-            # print(best_move_choices[move_index])
-            # print(len(best_move_choices), "length of best moves")
             best_move = best_move_choices[move_index]
+            player.hand = best_move.new_hand
             return best_move
         else:
             return Move(hand_letters, [], {})
