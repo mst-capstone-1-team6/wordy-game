@@ -6,7 +6,7 @@ import pygame
 from pygame.rect import Rect
 from pygame.sprite import Sprite, spritecollide, Group
 
-from wordy.base.aicontroller import AI_CONTROLLER
+from wordy.base.aicontroller import AIController
 from wordy.base.game import Game
 from wordy.base.worddict import file_to_set, WordDict
 from wordy.graphics import DISPLAY_WIDTH
@@ -109,11 +109,11 @@ class TitleScreen(Screen):
                 controllers.append(HumanController(f"Player {player_count}", self.word_dict))
                 player_count += 1
             else:
-                controllers.append(AI_CONTROLLER)
+                controllers.append(AIController("AI"))
         # controllers = [HumanController("Player1", self.word_dict), HumanController("Player2", self.word_dict),
         #                HumanController("Player3", self.word_dict), HumanController("Player4", self.word_dict)],
         game = Game(controllers, self.word_dict, self.computer_science_terms)
-        self.__next_screen = GameScreen(game)
+        self.__next_screen = GameScreen(game, self)
 
     def __event_handler(self):
         for event in pygame.event.get():

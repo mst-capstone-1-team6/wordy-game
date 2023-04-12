@@ -45,13 +45,44 @@ class Move:
     def score(self, board: Board, computer_science_terms: Set[str]) -> int:
         intersection_count = 0
         score = 0
-        for position in self.tile_placements:
-            any_horizontal = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((0, 1), (0, -1)))
-            any_vertical = any(board.tile_at((position[0] + vector[0], position[1] + vector[1])) is not None for vector in ((1, 0), (-1, 0)))
-            if any_horizontal:
+        is_horizontal_placement = True
+        if len(self.tile_placements) >= 2:
+            placements = list(self.tile_placements.keys())
+            is_horizontal_placement = placements[0][0] == placements[1][0]
+
+        ordered_tile_placement_positions = sorted(self.tile_placements.keys())
+        for i, position in enumerate(ordered_tile_placement_positions):
+            next_position = ordered_tile_placement_positions[i + 1] if i + 1 < len(ordered_tile_placement_positions) else None
+            any_between = len(list(over_positions(position, next_position))) > 2 if next_position is not None else False
+            if any_between:
                 intersection_count += 1
-            if any_vertical:
-                intersection_count += 1
+                # print(f"({i}) between")
+
+            horizontal_behind = board.tile_at((position[0], position[1] - 1)) is not None
+            horizontal_front = board.tile_at((position[0], position[1] + 1)) is not None
+            vertical_behind = board.tile_at((position[0] - 1, position[1])) is not None
+            vertical_front = board.tile_at((position[0] + 1, position[1])) is not None
+
+            if i == 0 and next_position is None:  # special case for a single tile being placed
+                intersection_count += min(2, [horizontal_front, horizontal_behind, vertical_front, vertical_behind].count(True))
+            else:
+                if i == 0:
+                    # for the first position, check to see if there's tiles "behind" us
+                    if (is_horizontal_placement and horizontal_behind) or (not is_horizontal_placement and vertical_behind):
+                        intersection_count += 1
+                        # print(f"({i}) before")
+                elif next_position is None:
+                    # for the last position, check to see if there's tiles "in front" of us
+                    if (is_horizontal_placement and horizontal_front) or (not is_horizontal_placement and vertical_front):
+                        intersection_count += 1
+                        # print(f"({i}) after")
+                if (
+                    ((horizontal_behind or horizontal_front) and not is_horizontal_placement)
+                    or ((vertical_behind or vertical_front) and is_horizontal_placement)
+                ):
+                    intersection_count += 1
+
+                    # print(f"({i}) above or below")
 
         computer_science_term_count = 0
         for placement in self.word_placement:
@@ -61,6 +92,7 @@ class Move:
 
             if placement.word in computer_science_terms:
                 computer_science_term_count += 1
+        # print(f"Intersections: {intersection_count}")
         return score * (2 ** max(0, intersection_count - 1)) * (2 ** computer_science_term_count)
 
 
@@ -81,10 +113,12 @@ class Controller(abc.ABC):
 
 
 class LetterBag:
-    letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
-               'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
-               'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
-               'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
+
+    def __init__(self):
+        self.letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+                   'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
+                   'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
+                   'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
 
     def get_tile(self) -> Tile:
         return self.letters.pop(random.randrange(len(self.letters)))
@@ -102,6 +136,7 @@ class Game:
         self.computer_science_terms = computer_science_terms
         self.turn_index = 0
         self.letter_bag = LetterBag()
+        self.end_condition = False
 
     @property
     def current_player(self) -> Tuple[Player, Controller]:
@@ -113,7 +148,7 @@ class Game:
         if move is not None:
             if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
                 if current_player.passed_last_turn:
-                    print("Hey! TODO end the game here! This is the second occurrence of this player passing their turn.")
+                    self.end_condition = True
                 current_player.passed_last_turn = True
             else:
                 current_player.passed_last_turn = False

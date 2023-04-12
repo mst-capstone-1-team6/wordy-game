@@ -20,7 +20,7 @@ class Tile(pygame.sprite.Sprite):
         self.board_tile = board
         self.l = letter
 
-        self.image = pygame.transform.scale(pygame.image.load("assets/letter/Wood/letter_" + letter + ".png"), self.piece_size)
+        self.image = pygame.transform.scale(pygame.image.load("assets/letter/NewWood/letter_" + letter + ".png"), self.piece_size)
 
         self.rect = self.image.get_rect()
         self.grid_spot = grid_pos

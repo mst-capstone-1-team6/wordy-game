@@ -12,7 +12,7 @@ class BoardDisplay(pygame.sprite.Sprite):
         self.board_size = board_size
         self.piece_size = piece_size
 
-        self.image = pygame.transform.scale(pygame.image.load("assets/letter/Marble/grid.png"), (self.piece_size*self.board_size, self.piece_size*self.board_size))
+        self.image = pygame.transform.scale(pygame.image.load("assets/letter/Marble/Background.png"), (1000, 800))
 
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = pos_x, pos_y
