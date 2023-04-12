@@ -55,6 +55,10 @@ def _create_button_add_player():
     return _create_sprite("assets/title/AddPlayer.png", 230, 80)
 
 
+def _create_background():
+    return _create_sprite("assets/letter/Marble/MarbleBackground.png", 1000, 800)
+
+
 def _rect_center_to(rect: Rect, x: int, y: int):
     rect.centerx = x
     rect.centery = y
@@ -90,12 +94,15 @@ class TitleScreen(Screen):
         _rect_center_to(self.button_start_game.rect, DISPLAY_WIDTH / 2, 600)
         self.button_add_human = _create_button_add_player()
         self.button_add_ai = _create_button_add_ai()
+        self.background = _create_background()
         _rect_center_to(self.button_add_human.rect, DISPLAY_WIDTH / 2 - 150, 510)
         _rect_center_to(self.button_add_ai.rect, DISPLAY_WIDTH / 2 + 150, 510)
 
+        self.ui_display.add(self.background)
         self.ui_display.add(self.button_start_game)
         self.ui_display.add(self.button_add_human)
         self.ui_display.add(self.button_add_ai)
+
         self.sprite_pool_player = [_create_button_player() for _ in range(4)]
         self.sprite_pool_ai = [_create_button_ai() for _ in range(4)]
 

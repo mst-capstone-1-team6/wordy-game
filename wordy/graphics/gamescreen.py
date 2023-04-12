@@ -55,7 +55,8 @@ class GameScreen(Screen):
 
         for event in pygame.event.get():
             common_handle_event(event)
-            if event.type == pygame.MOUSEBUTTONDOWN and isinstance(controller, HumanController):
+
+            if event.type == pygame.MOUSEBUTTONDOWN and isinstance(controller, HumanController) and not self.game.end_condition:
                 assert isinstance(controller, HumanController)
 
                 self.cursor.rect.x = event.pos[0]
@@ -146,7 +147,6 @@ class GameScreen(Screen):
         # Will need to iterate over the board to get where to place tiles at spots in the dict
         # self.game.current_player will return tuple of the controller and player
         # game.move contains the new hand, controllers will draw tiles after their turn
-
         self.game.update()
 
         if len(self.board_tiles.sprites()) != self.game.board.num_tiles():
