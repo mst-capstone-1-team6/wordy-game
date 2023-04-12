@@ -110,8 +110,6 @@ class TitleScreen(Screen):
                 player_count += 1
             else:
                 controllers.append(AIController("AI"))
-        # controllers = [HumanController("Player1", self.word_dict), HumanController("Player2", self.word_dict),
-        #                HumanController("Player3", self.word_dict), HumanController("Player4", self.word_dict)],
         game = Game(controllers, self.word_dict, self.computer_science_terms)
         self.__next_screen = GameScreen(game, self)
 
@@ -182,4 +180,6 @@ class TitleScreen(Screen):
             remove_button_group.draw(game_display)
 
     def next_screen(self) -> 'Screen':
-        return self.__next_screen
+        next_screen = self.__next_screen
+        self.__next_screen = self
+        return next_screen
