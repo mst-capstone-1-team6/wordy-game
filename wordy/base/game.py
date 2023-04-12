@@ -148,11 +148,13 @@ class Game:
 
     def update(self):
         (current_player, current_controller) = self.current_player
+
         if not self.end_condition:
             move = current_controller.make_move(self, current_player)
             if move is not None:
                 if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
-                    if current_player.passed_last_turn:
+                    all_others_have_passed = all(player.passed_last_turn for player, _ in self.players[:self.turn_index] + self.players[self.turn_index + 1:])
+                    if all_others_have_passed:
                         self.end_condition = True
                     current_player.passed_last_turn = True
                 else:
@@ -160,6 +162,5 @@ class Game:
 
                 current_player.score += move.score(self.board, self.computer_science_terms)
                 current_player.hand = move.new_hand
-                print("curp: ", current_player.hand)
                 self.board = self.board.place_tiles(move.tile_placements)
                 self.turn_index = (self.turn_index + 1) % len(self.players)
