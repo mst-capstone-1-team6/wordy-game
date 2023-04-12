@@ -221,6 +221,7 @@ class GameScreen(Screen):
                 controller.hand_tiles.draw(game_display)
                 controller.hand_tiles.update(game_display)
 
+        self.game.update()
         # there is a player whose turn it is
         # there is a controller corresponding to that player
         # if that controller is a HumanPlayer, then we should display their hand on the screen and handle drag/drops as a move
@@ -231,7 +232,7 @@ class GameScreen(Screen):
         if self.game.end_condition and self.menu:
             return self.return_screen
         if self.game.end_condition and self.rematch:
-            new_game = Game([controller for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
+            new_game = Game([controller.copy() for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
             return GameScreen(new_game, self.return_screen)
         return self
 

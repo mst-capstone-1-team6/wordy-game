@@ -14,6 +14,9 @@ class AIController(Controller):
         super().__init__()
         self.name = name
 
+    def copy(self) -> 'Controller':
+        return self
+
     def draw_tiles(self, num_tiles: int, letter_bag: LetterBag):
         tiles = []
         for i in range(num_tiles):
