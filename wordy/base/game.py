@@ -81,10 +81,12 @@ class Controller(abc.ABC):
 
 
 class LetterBag:
-    letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
-               'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
-               'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
-               'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
+
+    def __init__(self):
+        self.letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+                   'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M',
+                   'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
+                   'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
 
     def get_tile(self) -> Tile:
         return self.letters.pop(random.randrange(len(self.letters)))
@@ -102,6 +104,7 @@ class Game:
         self.computer_science_terms = computer_science_terms
         self.turn_index = 0
         self.letter_bag = LetterBag()
+        self.end_condition = False
 
     @property
     def current_player(self) -> Tuple[Player, Controller]:
@@ -113,7 +116,7 @@ class Game:
         if move is not None:
             if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
                 if current_player.passed_last_turn:
-                    print("Hey! TODO end the game here! This is the second occurrence of this player passing their turn.")
+                    self.end_condition = True
                 current_player.passed_last_turn = True
             else:
                 current_player.passed_last_turn = False

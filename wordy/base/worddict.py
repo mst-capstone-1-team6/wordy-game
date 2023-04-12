@@ -32,16 +32,6 @@ class WordDict():
         new = cls.__new__(cls)
         new.words = [word.upper() for word in words]
         return new
-    """
-    @classmethod
-    def can_be_spelled(cls, word, letters: List) -> bool:
-        for l in word.upper():
-            if l not in letters:
-                return False
-            else:
-                letters.remove(l)
-        return True
-    """
 
     @classmethod
     def can_be_spelled(cls, word, letters: List) -> bool:
@@ -71,9 +61,9 @@ class WordDict():
         """Find all words in the dictionary which contain the given letter and their start positions on the board
            eg. find_one_letter("a", 4) will return a list like [WordInfo("apple", {4}), WordInfo("watermelon", {3}), WordInfo("year", {2}), ...]"""
         set_let = set_let.upper()
-        #Generate list of all words containing the given letter
+        # Generate list of all words containing the given letter
         temp = [word for word in self.words if word.find(set_let) != -1]
-        #Restrict words to only contain the letter at the given indexes
+        # Restrict words to only contain the letter at the given indexes
         results = []
         for word in temp:
             index_set = set()
@@ -88,9 +78,8 @@ class WordDict():
 
     def find_many_letters(self, lets: List[str], offsets: List[int]) -> List[WordInfo]:
         """Find all words in the dictionary which contain the given letters at the given relative offsets
-           eg. find_many_letters(["a", "l"], [0, 1]) will return a list like ["ale", "all", "allow", "evaluate", "seasonal", ...]
-               find_many_letters(["e", "s"], [0, 4]) will return a list like ["warehouse", "tunnelers", "snivelers", ...]
-               find_many_letters(["l", "a", "e"], [-2, -1, 3]) will return a list like ["lawbreaking", "planeness", "plaintext"]
+           eg. find_many_letters(["a", "l"], [0, 1]) will return a list like [WordInfo("ale", {0}), WordInfo("evaluate", {-2}), WordInfo("seasonal", {-6}), ...]
+               find_many_letters(["n", "a"], [0, 1]) will return a list like [WordInfo("banana", {-2, -4}), WordInfo("functional", {-7}), ...]
         """
         lets = [let.upper() for let in lets]
         max_offset = max(offsets)

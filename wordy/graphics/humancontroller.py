@@ -9,12 +9,13 @@ from wordy.graphics.tile import Tile
 
 class HumanController(Controller):
 
-    def __init__(self, name):
+    def __init__(self, name, word_dict):
         super().__init__()
 
         self.finished_move = False
         self.hand_tiles = pygame.sprite.LayeredUpdates()
         self.name = name
+        self.word_dict = word_dict
         self.empty_spots = [0, 1, 2, 3, 4, 5, 6]
         self.move = None
 
@@ -87,6 +88,10 @@ class HumanController(Controller):
 
             if not first_word and not intersect_flag:
                 raise ValueError()
+            
+            for word in cur_board.get_words(tile_places):
+                if not self.word_dict.test_word(word.word):
+                    raise ValueError()
 
             s: Tile
             for s in self.hand_tiles.sprites():
@@ -106,7 +111,8 @@ class HumanController(Controller):
 
     def draw_tiles(self, letter_bag: LetterBag):
         for i in self.empty_spots:
-            self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile(), False))
+            if not len(letter_bag.letters) == 0:
+                self.hand_tiles.add(Tile((17, 3 + i), letter_bag.get_tile(), False))
         self.empty_spots = []
 
     def return_tiles(self):
