@@ -67,7 +67,10 @@ class AIController(Controller):
                     best_score = move.score(game.board, game.computer_science_terms)
                     move_index = which_move - 1
             print(moves[move_index])
-            return moves[move_index]
+            best_move = moves[move_index]
+            num_tiles = 7 - len(best_move.new_hand)
+            best_move.new_hand = self.draw_tiles(num_tiles, game.letter_bag) + best_move.new_hand
+            return best_move
 
         for curr_move in possible_moves:
             temp_letters = []
