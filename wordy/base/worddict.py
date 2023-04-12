@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-
+from collections import Counter
 from pathlib import Path
 from typing import List, Set, Optional
 
@@ -13,13 +13,12 @@ class WordInfo():
 
 class WordDict():
     """To create a new WordDict use either WordDict.from_file() or WordDict.from_list()"""
+
     def __init__(self):
         self.words = []
 
-
     def add_word(self, word):
         self.words.append(word)
-
 
     @classmethod
     def from_file(cls, fileName: str) -> WordDict:
@@ -28,22 +27,24 @@ class WordDict():
             new.words: List[str] = [i.rstrip() for i in f.readlines()]
         return new
 
-
     @classmethod
     def from_list(cls, words: List[str]) -> WordDict:
         new = cls.__new__(cls)
         new.words = [word.upper() for word in words]
         return new
 
-
     @classmethod
     def can_be_spelled(cls, word, letters: List) -> bool:
-        for l in word.upper():
-            if l not in letters: 
+        word_counts = Counter(word.upper())
+        hand_counts = Counter(letters)
+        for letter, count in word_counts.items():
+            if letter not in hand_counts or hand_counts[letter] < count:
                 return False
-            else: 
-                letters.remove(l) 
         return True
+
+    def trim_by_hand(self, hand: List) -> WordDict:
+        """Returns a new dictionary which contains only the words in self which can be spelled with letters given"""
+        return WordDict.from_list([word for word in self.words if WordDict.can_be_spelled(word, hand)])
     
 
     def trim_by_hand(self, hand: List) -> WordDict:
@@ -55,15 +56,12 @@ class WordDict():
         """Returns a new dictonary which contains only the words in self which fall between the given lengths"""
         return WordDict.from_list([word for word in self.words if len(word) < max and len(word) > min])
 
-
     def trim_by_letters(self, lets: List[str] = []) -> WordDict:
         """Returns a new dictionary which contains only the words in self which contain the given letters"""
         return WordDict.from_list([word for word in self.words if all([1 if word.find(let) != -1 else 0 for let in lets])])
 
-
     def test_word(self, test: str) -> bool:
         return test.upper() in self.words
-
 
     def find_one_letter(self, set_let: str, position_on_board: int) -> List[WordInfo]:
         """Find all words in the dictionary which contain the given letter and their start positions on the board
@@ -84,7 +82,6 @@ class WordDict():
             results.append(WordInfo(word, start_set))
         return results
 
-
     def find_many_letters(self, lets: List[str], offsets: List[int]) -> List[WordInfo]:
         """Find all words in the dictionary which contain the given letters at the given relative offsets
            eg. find_many_letters(["a", "l"], [0, 1]) will return a list like [WordInfo("ale", {0}), WordInfo("evaluate", {-2}), WordInfo("seasonal", {-6}), ...]
@@ -93,10 +90,10 @@ class WordDict():
         lets = [let.upper() for let in lets]
         max_offset = max(offsets)
         min_offset = min(offsets)
-        #Generate list of all words containing the given letters of a valid length and letters
+        # Generate list of all words containing the given letters of a valid length and letters
         temp = self.trim_by_letters(lets)
-        temp = temp.trim_by_length(min = max_offset - min_offset)
-        #Restrict words to only have the correct letters at the correct offsets
+        temp = temp.trim_by_length(min=max_offset - min_offset)
+        # Restrict words to only have the correct letters at the correct offsets
         results = []
         for word in temp.words:
             valid_start_offsets = set()
@@ -135,4 +132,3 @@ def file_to_set(path: Path, word_dict: Optional[WordDict]) -> Set[str]:
                         if word_dict.test_word(weird_plural):
                             r.add(weird_plural)
     return r
-

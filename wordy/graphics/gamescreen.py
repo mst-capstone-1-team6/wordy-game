@@ -22,7 +22,8 @@ class GameScreen(Screen):
         self.player_num = 0
 
         for p, c in self.game.players:
-            c.draw_tiles(self.game.letter_bag)
+            if isinstance(c, HumanController):
+                c.draw_tiles(self.game.letter_bag)
 
         self.ET_button = Button((self.piece_size * 15.65), (self.piece_size * 13.45), 190, 76, "END TURN")
         self.NH_button = Button((self.piece_size * 15.65), (self.piece_size * 11.85), 190, 76, "NEW HAND")
@@ -93,7 +94,7 @@ class GameScreen(Screen):
                 elif event.button == 1 and self.AR_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
                     controller.return_tiles()
 
-            elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP and isinstance(controller, HumanController):
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
                 for s in controller.hand_tiles:  # Loop over all tiles to find the one being dragged
@@ -122,10 +123,11 @@ class GameScreen(Screen):
             elif event.type == pygame.MOUSEMOTION:
                 self.cursor.rect.x = event.pos[0]
                 self.cursor.rect.y = event.pos[1]
-                for s in controller.hand_tiles:  # Update the position of a dragged tile
-                    if s.dragging:
-                        s.rect.x = self.cursor.rect.x + s.off_x
-                        s.rect.y = self.cursor.rect.y + s.off_y
+                if isinstance(controller, HumanController):
+                    for s in controller.hand_tiles:  # Update the position of a dragged tile
+                        if s.dragging:
+                            s.rect.x = self.cursor.rect.x + s.off_x
+                            s.rect.y = self.cursor.rect.y + s.off_y
 
     def update(self, game_display):
         self.__event_handler()

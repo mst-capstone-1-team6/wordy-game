@@ -8,6 +8,7 @@ from wordy.graphics.common import common_handle_event
 from wordy.graphics.humancontroller import HumanController
 from wordy.graphics.screen import Screen
 from wordy.graphics.gamescreen import GameScreen
+from wordy.base.aicontroller import AIController
 
 
 class TitleScreen(Screen):
@@ -28,7 +29,9 @@ class TitleScreen(Screen):
 
     def next_screen(self) -> 'Screen':
         game = Game(
-            [HumanController("Player1", self.word_dict), HumanController("Player2", self.word_dict), HumanController("Player3", self.word_dict), HumanController("Player4", self.word_dict)],
+
+            [HumanController("Player1", self.word_dict), AIController("jeff"), HumanController("Player3", self.word_dict), HumanController("Player4", self.word_dict)],
+
             self.word_dict, self.computer_science_terms
         )
         return GameScreen(game)
