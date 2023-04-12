@@ -20,6 +20,12 @@ class AIController(Controller):
             tiles.append(letter_bag.get_tile())
         return tiles
 
+    def valid_board(self, game: Game, move: Move):
+        for word in game.board.get_words(move.tile_placements):
+            if not game.word_dict.test_word(word.word):
+                return False
+        return True
+
     def make_move(self, game: Game, player: Player) -> Optional[Move]:
         num_tiles = 7 - len(player.hand)
         hand_letters = self.draw_tiles(num_tiles, game.letter_bag) + player.hand
@@ -54,24 +60,24 @@ class AIController(Controller):
             temp_dict = game.word_dict.trim_by_length(0, length)
             temp_pos = list(curr_move[0])
             temp_hand_letters = [str(tile) for tile in hand_letters]
-            print(temp_hand_letters+temp_letters, "letter set")
+            #print(temp_hand_letters+temp_letters, "letter set")
             temp_dict = temp_dict.trim_by_hand(temp_hand_letters+temp_letters)
-            print(temp_dict.words, "temp_dict.words")
+            #print(temp_dict.words, "temp_dict.words")
             temp_dict2 = []
             if len(letter_pos) == 1:
-                print('one letter')
+                #print('one letter')
                 if direction == "horizontal":
                     temp_dict2 = temp_dict.find_one_letter(temp_letters[0], letter_pos[0][1])
                 else:
                     temp_dict2 = temp_dict.find_one_letter(temp_letters[0], letter_pos[0][0])
             if len(letter_pos) > 1:
-                print('two letter')
+                #print('two letter')
                 if direction == "horizontal":
                     temp_dict2 = temp_dict.find_many_letters(temp_letters, [letter[1]-curr_move[0][1] for letter in letter_pos])
                 else:
                     temp_dict2 = temp_dict.find_many_letters(temp_letters, [letter[0]-curr_move[0][0] for letter in letter_pos])
             valid_words = []
-            print(temp_hand_letters)
+            #print(temp_hand_letters)
             #print(temp_dict2)
             """this code will need to change syntax to match the new data type ryan is making"""
             #print(temp_dict2)
@@ -108,7 +114,9 @@ class AIController(Controller):
                         if i in temp_hand_tiles2 and i not in temp_letters:
                             temp_hand_tiles2.remove(i)
                     #print(temp_hand_tiles, "handtiles 2")
-                    move_choices.append(Move(temp_hand_tiles2, game.board.get_words(temp_tile_placements), temp_tile_placements))
+                    temp_move = Move(temp_hand_tiles2, game.board.get_words(temp_tile_placements), temp_tile_placements)
+                    if self.valid_board(game, temp_move):
+                        move_choices.append(temp_move)
                 best_score = 0
                 which_move = 0
                 move_index = 0
@@ -126,14 +134,14 @@ class AIController(Controller):
             if move.score(game.board, game.computer_science_terms) > best_score:
                 best_score = move.score(game.board, game.computer_science_terms)
                 move_index = which_move - 1
-        print(best_score, "best score")
-        print(move_index, "move index")
+        #print(best_score, "best score")
+        #print(move_index, "move index")
         if len(best_move_choices) > 0:
             for tile in player.hand:
                 if tile in best_move_choices[move_index].tile_placements:
                     player.hand.remove(tile)
-            print(best_move_choices[move_index])
-            print(len(best_move_choices), "length of best moves")
+            #print(best_move_choices[move_index])
+            #print(len(best_move_choices), "length of best moves")
             best_move = best_move_choices[move_index]
             return best_move
         else:
