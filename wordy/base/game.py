@@ -111,6 +111,10 @@ class Controller(abc.ABC):
     def make_move(self, game: 'Game', player: Player) -> Optional[Move]:  # TODO define return type
         pass
 
+    @abc.abstractmethod
+    def copy(self) -> 'Controller':
+        pass
+
 
 class LetterBag:
 

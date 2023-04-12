@@ -258,7 +258,7 @@ class GameScreen(Screen):
         if self.game.end_condition and self.menu:
             return self.return_screen
         if self.game.end_condition and self.rematch:
-            new_game = Game([controller for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
+            new_game = Game([controller.copy() for _, controller in self.game.players], self.game.word_dict, self.game.computer_science_terms)
             return GameScreen(new_game, self.return_screen)
         return self
 

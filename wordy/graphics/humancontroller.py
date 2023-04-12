@@ -19,6 +19,9 @@ class HumanController(Controller):
         self.empty_spots = [0, 1, 2, 3, 4, 5, 6]
         self.move = None
 
+    def copy(self) -> 'Controller':
+        return HumanController(self.name, self.word_dict)
+
     def new_hand(self, letter_bag: LetterBag):
         i = 0
         s: Tile
@@ -88,7 +91,7 @@ class HumanController(Controller):
 
             if not first_word and not intersect_flag:
                 raise ValueError()
-            
+
             for word in cur_board.get_words(tile_places):
                 if not self.word_dict.test_word(word.word):
                     raise ValueError()
