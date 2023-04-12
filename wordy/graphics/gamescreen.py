@@ -52,7 +52,7 @@ class GameScreen(Screen):
 
         for event in pygame.event.get():
             common_handle_event(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and isinstance(controller, HumanController):
                 assert isinstance(controller, HumanController)
 
                 self.cursor.rect.x = event.pos[0]
@@ -221,9 +221,30 @@ class GameScreen(Screen):
                 controller.hand_tiles.draw(game_display)
                 controller.hand_tiles.update(game_display)
 
+        elif isinstance(controller, AIController):
+            text_surface = font.render(str(len(self.game.letter_bag.letters)) + " letters left", True, (0, 0, 0))
+            game_display.blit(text_surface, (self.piece_size * 15.7, self.piece_size * 0.2))
+
+            p: Player
+            c: Controller
+            for i in range(len(self.game.players)):
+                (p, c) = self.game.players[i]
+                if isinstance(c, AIController):
+                    text_surface = font.render("AI: " + str(p.score), True, (0, 0, 0))
+                else:
+                    text_surface = font.render(c.name + ": " + str(p.score), True, (0, 0, 0))
+                game_display.blit(text_surface, (self.piece_size * (0.3 + (5 * i)), self.piece_size * 15.2))
+
+            text_surface = font.render("It is now", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 5.8))
+            text_surface = font.render(controller.name + "'s", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 6.4))
+            text_surface = font.render("turn", True, (0, 0, 0))
+            game_display.blit(text_surface, (750 + (125 - (text_surface.get_rect().size[0] / 2)), self.piece_size * 7))
         # there is a player whose turn it is
         # there is a controller corresponding to that player
         # if that controller is a HumanPlayer, then we should display their hand on the screen and handle drag/drops as a move
+
 
         # TODO check if the game has ended. If it has, then display a pop up showing results (winner or tie) of the game
 
