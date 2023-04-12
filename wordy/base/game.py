@@ -120,8 +120,11 @@ class LetterBag:
                    'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S',
                    'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z']
 
-    def get_tile(self) -> Tile:
-        return self.letters.pop(random.randrange(len(self.letters)))
+    def get_tile(self):
+        if len(self.letters) > 0:
+            return self.letters.pop(random.randrange(len(self.letters)))
+        else:
+            return None
 
     def return_tile(self, tile: Tile):
         self.letters.append(tile)
