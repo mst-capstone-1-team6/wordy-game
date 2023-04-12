@@ -52,8 +52,6 @@ class AIController(Controller):
                 else:
                     temp_pos[0] = temp_pos[0] + 1
             temp_dict = game.word_dict.trim_by_length(0, length)
-            #print(temp_dict.words, "temP_dict.words")
-            #temp_dict = temp_dict.trim_by_letters(hand_letters+temp_letters)
             temp_pos = list(curr_move[0])
             temp_hand_letters = [str(tile) for tile in hand_letters]
             print(temp_hand_letters+temp_letters, "letter set")
@@ -62,7 +60,6 @@ class AIController(Controller):
             temp_dict2 = []
             if len(letter_pos) == 1:
                 print('one letter')
-                """add in here somewhere in these if statements, ryans new function for trim by hand before the next dict"""
                 if direction == "horizontal":
                     temp_dict2 = temp_dict.find_one_letter(temp_letters[0], letter_pos[0][1])
                 else:
@@ -74,7 +71,6 @@ class AIController(Controller):
                 else:
                     temp_dict2 = temp_dict.find_many_letters(temp_letters, [letter[0]-curr_move[0][0] for letter in letter_pos])
             valid_words = []
-            #temp_hand_letters = [str(tile) for tile in hand_letters]
             print(temp_hand_letters)
             #print(temp_dict2)
             """this code will need to change syntax to match the new data type ryan is making"""
@@ -93,7 +89,6 @@ class AIController(Controller):
                         else:
                             break
                     for i, letter in enumerate(word.word_str):
-                        #temp_index = temp_hand_letters.index(word.word_str[i])
                         #print(temp_hand_tiles[temp_index])
                         if direction == "horizontal":
                             key = (curr_move[0][0], curr_offset+i)
@@ -105,7 +100,6 @@ class AIController(Controller):
                             value = temp_hand_tiles[temp_index]
                             pair = (key, value)
                             temp_tile_placements.update([pair])
-                    """this is nonsense doing nothing never being changed"""
                     for i in range(len(letter_pos)):
                         if tuple(letter_pos[i]) in temp_tile_placements.keys():
                             temp_tile_placements.pop(tuple(letter_pos[i]))
@@ -114,7 +108,6 @@ class AIController(Controller):
                         if i in temp_hand_tiles2 and i not in temp_letters:
                             temp_hand_tiles2.remove(i)
                     #print(temp_hand_tiles, "handtiles 2")
-                        #hand_letters.remove(word(i)
                     move_choices.append(Move(temp_hand_tiles2, game.board.get_words(temp_tile_placements), temp_tile_placements))
                 best_score = 0
                 which_move = 0
