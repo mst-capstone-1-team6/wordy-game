@@ -139,6 +139,7 @@ class Game:
         self.computer_science_terms = computer_science_terms
         self.turn_index = 0
         self.letter_bag = LetterBag()
+        print(len(self.letter_bag.letters))
         self.end_condition = False
 
     @property
@@ -147,15 +148,18 @@ class Game:
 
     def update(self):
         (current_player, current_controller) = self.current_player
-        move = current_controller.make_move(self, current_player)
-        if move is not None:
-            if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
-                if current_player.passed_last_turn:
-                    self.end_condition = True
-                current_player.passed_last_turn = True
-            else:
-                current_player.passed_last_turn = False
+        if not self.end_condition:
+            move = current_controller.make_move(self, current_player)
+            if move is not None:
+                if move.new_hand == current_player.hand and not move.word_placement:  # check if the player is passing their turn
+                    if current_player.passed_last_turn:
+                        self.end_condition = True
+                    current_player.passed_last_turn = True
+                else:
+                    current_player.passed_last_turn = False
 
-            current_player.score += move.score(self.board, self.computer_science_terms)
-            self.board = self.board.place_tiles(move.tile_placements)
-            self.turn_index = (self.turn_index + 1) % len(self.players)
+                current_player.score += move.score(self.board, self.computer_science_terms)
+                current_player.hand = move.new_hand
+                print("curp: ", current_player.hand)
+                self.board = self.board.place_tiles(move.tile_placements)
+                self.turn_index = (self.turn_index + 1) % len(self.players)

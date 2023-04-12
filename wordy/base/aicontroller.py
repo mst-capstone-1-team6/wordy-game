@@ -28,8 +28,7 @@ class AIController(Controller):
         return True
 
     def make_move(self, game: Game, player: Player) -> Optional[Move]:
-        num_tiles = 7 - len(player.hand)
-        hand_letters = self.draw_tiles(num_tiles, game.letter_bag) + player.hand
+        hand_letters = player.hand
         possible_moves = valid_moves(game.board)
         move_choices = []
         best_move_choices = []
@@ -70,7 +69,10 @@ class AIController(Controller):
                     best_score = move.score(game.board, game.computer_science_terms)
                     move_index = which_move - 1
             print(moves[move_index])
-            return moves[move_index]
+            best_move = moves[move_index]
+            num_tiles = 7 - len(best_move.new_hand)
+            best_move.new_hand = self.draw_tiles(num_tiles, game.letter_bag) + best_move.new_hand
+            return best_move
 
         for curr_move in possible_moves:
             temp_letters = []
@@ -182,6 +184,9 @@ class AIController(Controller):
             # print(best_move_choices[move_index])
             # print(len(best_move_choices), "length of best moves")
             best_move = best_move_choices[move_index]
+            num_tiles = 7 - len(best_move.new_hand)
+            best_move.new_hand = self.draw_tiles(num_tiles, game.letter_bag) + best_move.new_hand
+            print(best_move)
             return best_move
         else:
             return Move(hand_letters, [], {})

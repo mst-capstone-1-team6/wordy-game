@@ -25,6 +25,9 @@ class GameScreen(Screen):
         for p, c in self.game.players:
             if isinstance(c, HumanController):
                 c.draw_tiles(self.game.letter_bag)
+            elif isinstance(c, AIController):
+                p.hand = c.draw_tiles(7, self.game.letter_bag)
+
 
         self.ET_button = Button((self.piece_size * 15.65), (self.piece_size * 13.45), 190, 76, "END TURN")
         self.NH_button = Button((self.piece_size * 15.65), (self.piece_size * 11.85), 190, 76, "NEW HAND")
@@ -62,10 +65,7 @@ class GameScreen(Screen):
 
                 if event.button == 1 and self.CT_button.rect.colliderect(self.cursor.rect) and not self.player_num == self.game.turn_index:
                     self.player_num = self.game.turn_index
-                elif event.button == 1 and self.ME_button.rect.colliderect(self.cursor.rect) and self.game.end_condition:
-                    self.menu = True
-                elif event.button == 1 and self.RM_button.rect.colliderect(self.cursor.rect) and self.game.end_condition:
-                    self.rematch = True
+
 
                 elif event.button == 1 and sprite_collides and self.player_num == self.game.turn_index:
                     s = sprite_collides[len(sprite_collides) - 1]  # Only selects the top most tile
@@ -95,6 +95,12 @@ class GameScreen(Screen):
 
                 elif event.button == 1 and self.AR_button.rect.colliderect(self.cursor.rect) and self.player_num == self.game.turn_index:
                     controller.return_tiles()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.game.end_condition:
+                if event.button == 1 and self.ME_button.rect.colliderect(self.cursor.rect):
+                    self.menu = True
+                elif event.button == 1 and self.RM_button.rect.colliderect(self.cursor.rect):
+                    self.rematch = True
 
             elif event.type == pygame.MOUSEBUTTONUP and isinstance(controller, HumanController):
                 self.cursor.rect.x = event.pos[0]
