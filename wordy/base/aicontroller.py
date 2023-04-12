@@ -53,11 +53,11 @@ class AIController(Controller):
                 else:
                     temp_pos[0] = temp_pos[0] + 1
             temp_dict = game.word_dict.trim_by_length(0, length)
-            #print(temp_dict.words, "temP_dict.words")
+            print(temp_dict.words, "temP_dict.words")
             #temp_dict = temp_dict.trim_by_letters(hand_letters+temp_letters)
             temp_pos = list(curr_move[0])
             temp_hand_letters = [str(tile) for tile in hand_letters]
-            #print(temp_hand_letters+temp_letters, "letter set")
+            print(temp_hand_letters+temp_letters, "letter set")
             temp_dict = temp_dict.trim_by_hand(temp_hand_letters+temp_letters)
             print(temp_dict.words, "temp_dict.words")
             temp_dict2 = []
